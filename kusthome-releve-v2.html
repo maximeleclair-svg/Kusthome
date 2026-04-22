@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Relevé Chantier — Kusthome</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --dark: #141412;
+    --mid: #2a2a26;
+    --accent: #c8954a;
+    --accent2: #e8b86d;
+    --warm: #f5f0e8;
+    --surface: #1e1e1a;
+    --card: #252521;
+    --border: rgba(200,149,74,0.2);
+    --muted: #888880;
+    --green: #6ab187;
+    --red: #e07060;
+    --yellow: #e8c46a;
+  }
+
+  html, body { height: 100%; background: var(--dark); color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 15px; overflow-x: hidden; }
+
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* TOPBAR */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px 14px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); }
+  .topbar-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 1px; }
+  .topbar-right { font-size: 12px; color: var(--muted); text-align: right; }
+
+  .progress-bar { height: 3px; background: var(--mid); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 20px 16px 120px; overflow-y: auto; }
+
+  /* HOME */
+  .hero { padding: 36px 20px 28px; text-align: center; }
+  .hero-icon { font-size: 44px; margin-bottom: 14px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--accent); margin-bottom: 8px; }
+  .hero p { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 280px; margin: 0 auto; }
+
+  /* TYPE SELECTOR */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .type-btn { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .type-btn.selected { border-color: var(--accent); background: rgba(200,149,74,0.1); }
+  .type-btn .tb-icon { font-size: 24px; margin-bottom: 6px; }
+  .type-btn .tb-label { font-size: 13px; font-weight: 500; color: var(--warm); }
+
+  /* FIELDS */
+  .field-group { margin-bottom: 18px; }
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; display: block; }
+  .field-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .field-input:focus { border-color: var(--accent); }
+  .field-input::placeholder { color: var(--muted); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* SECTION CARDS */
+  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+  .section-card-header { padding: 16px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+  .section-icon { font-size: 20px; }
+  .section-name { font-weight: 500; font-size: 15px; flex: 1; }
+  .section-badge { font-size: 11px; background: rgba(200,149,74,0.15); color: var(--accent); padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+  .section-badge.done { background: rgba(106,177,135,0.15); color: var(--green); }
+  .section-chevron { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .section-card.open .section-chevron { transform: rotate(180deg); }
+  .section-body { display: none; padding: 4px 18px 18px; border-top: 1px solid var(--border); }
+  .section-card.open .section-body { display: block; }
+
+  /* CHECK ITEMS */
+  .check-item { padding: 14px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .check-item:last-child { border-bottom: none; }
+  .check-top { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .check-box { width: 26px; height: 26px; border: 2px solid var(--muted); border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 1px; }
+  .check-box.checked { background: var(--accent); border-color: var(--accent); }
+  .check-box.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: 700; }
+  .check-box.warning { border-color: var(--yellow); }
+  .check-box.warning.checked { background: var(--yellow); border-color: var(--yellow); }
+  .check-name { font-size: 15px; font-weight: 500; line-height: 1.4; flex: 1; }
+  .check-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  /* DETAIL PANEL */
+  .detail-panel { display: none; margin-top: 12px; margin-left: 38px; }
+  .detail-panel.visible { display: block; }
+
+  /* STATUS BTNS */
+  .status-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .status-btn { padding: 7px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .status-btn.ok.active { background: rgba(106,177,135,0.2); border-color: var(--green); color: var(--green); }
+  .status-btn.warn.active { background: rgba(232,196,106,0.2); border-color: var(--yellow); color: var(--yellow); }
+  .status-btn.ko.active { background: rgba(224,112,96,0.2); border-color: var(--red); color: var(--red); }
+
+  /* DETAIL QUESTIONS */
+  .detail-questions { display: flex; flex-direction: column; gap: 10px; }
+  .dq-item { }
+  .dq-label { font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+  .dq-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; -webkit-appearance: none; }
+  .dq-input:focus { border-color: var(--accent); }
+  .dq-input::placeholder { color: var(--muted); font-style: italic; }
+  .dq-textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; resize: none; min-height: 65px; -webkit-appearance: none; }
+  .dq-textarea:focus { border-color: var(--accent); }
+  .dq-textarea::placeholder { color: var(--muted); font-style: italic; }
+  .dq-select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; -webkit-appearance: none; }
+
+  /* DIMENSIONS */
+  .dim-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .dim-field { display: flex; flex-direction: column; gap: 4px; }
+  .dim-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .dim-input { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 8px; color: var(--warm); font-size: 16px; font-family: 'DM Sans', sans-serif; outline: none; text-align: center; -webkit-appearance: none; width: 100%; }
+  .dim-input:focus { border-color: var(--accent); }
+  .dim-input::placeholder { color: var(--muted); font-size: 11px; }
+
+  /* BOTTOM CTA */
+  .bottom-cta { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px; background: linear-gradient(to top, var(--dark) 60%, transparent); padding-top: 32px; }
+  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--dark); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 16px; border: none; border-radius: 14px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; -webkit-appearance: none; }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-secondary { width: 100%; background: transparent; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 12px; border: 1px solid var(--border); border-radius: 14px; cursor: pointer; margin-top: 10px; -webkit-appearance: none; }
+
+  /* RAPPORT */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--accent); }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .rapport-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .rapport-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .rapport-item { font-size: 13px; color: var(--warm); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.5; }
+  .rapport-item:last-child { border-bottom: none; }
+  .r-dot { color: var(--accent); margin-right: 6px; }
+  .r-dot.warn { color: var(--yellow); }
+  .r-dot.ko { color: var(--red); }
+  .r-detail { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; margin-left: 14px; font-style: italic; }
+  .copy-area { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; color: var(--warm); line-height: 1.7; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; margin-bottom: 10px; max-height: 280px; overflow-y: auto; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .info-note { font-size: 11px; color: var(--muted); text-align: center; padding: 12px; font-style: italic; }
+  textarea { resize: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN 1 : HOME ═══ -->
+<div class="screen active" id="screen-home">
+  <div class="topbar">
+    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub">Relevé de chantier</div></div>
+    <div class="topbar-right">Maxime Leclair</div>
+  </div>
+  <div class="content">
+    <div class="hero">
+      <div class="hero-icon">📐</div>
+      <h1>Nouveau relevé</h1>
+      <p>Renseigne les infos du chantier pour démarrer</p>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Type de chantier</label>
+      <div class="type-grid">
+        <div class="type-btn selected" id="type-sdb" onclick="selectType('sdb', this)">
+          <div class="tb-icon">🚿</div><div class="tb-label">Salle de bain</div>
+        </div>
+        <div class="type-btn" id="type-cuisine" onclick="selectType('cuisine', this)">
+          <div class="tb-icon">🍳</div><div class="tb-label">Cuisine</div>
+        </div>
+        <div class="type-btn" id="type-complet" onclick="selectType('complet', this)">
+          <div class="tb-icon">🏠</div><div class="tb-label">Rénovation complète</div>
+        </div>
+        <div class="type-btn" id="type-autre" onclick="selectType('autre', this)">
+          <div class="tb-icon">🔧</div><div class="tb-label">Autre</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Client(s)</label>
+      <input class="field-input" id="f-client" type="text" placeholder="Nom du client" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Adresse</label>
+      <input class="field-input" id="f-adresse" type="text" placeholder="Adresse du chantier" autocomplete="off">
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label">Date</label>
+        <input class="field-input" id="f-date" type="date">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Type de bien</label>
+        <select class="field-input" id="f-bien">
+          <option value="">Choisir...</option>
+          <option>Maison individuelle</option>
+          <option>Appartement</option>
+          <option>Maison en pierre</option>
+          <option>Maison ossature bois</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Contexte & souhaits client</label>
+      <textarea class="field-input" id="f-notes" rows="3" placeholder="Ce que le client veut, budget évoqué, contraintes..."></textarea>
+    </div>
+  </div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="goToChecklist()">Commencer le relevé →</button>
+  </div>
+</div>
+
+
+<!-- ═══ SCREEN 2 : CHECKLIST ═══ -->
+<div class="screen" id="screen-checklist">
+  <div class="topbar">
+    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub" id="cl-subtitle">Relevé</div></div>
+    <div class="topbar-right" id="cl-progress-text">0 / 0</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="content" id="checklist-content"></div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="goToRapport()">Générer le rapport →</button>
+  </div>
+</div>
+
+
+<!-- ═══ SCREEN 3 : RAPPORT ═══ -->
+<div class="screen" id="screen-rapport">
+  <div class="topbar">
+    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub">Rapport de relevé</div></div>
+    <div class="topbar-right" id="rp-date"></div>
+  </div>
+  <div class="content" id="rapport-content"></div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="copyRapport()">📋 Copier pour l'IA</button>
+    <button class="btn-secondary" onclick="newReleve()">+ Nouveau relevé</button>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════════════
+// SECTIONS DATA
+// ══════════════════════════════════════════════════════
+
+const SECTIONS_SDB = [
+  { id:'dims', icon:'📏', title:'Dimensions', type:'dimensions' },
+  {
+    id:'plomberie', icon:'🔧', title:'Plomberie',
+    items: [
+      { id:'ef_arrivee', label:'Arrivée eau froide', warning:false, questions:[
+        { key:'position', label:'Position actuelle', ph:'Ex: sous vasque, dans le mur à gauche...' },
+        { key:'diametre', label:'Diamètre (en mm)', ph:'Ex: 16, 20...' },
+        { key:'etat', label:'État général', type:'select', opts:['Bon état','À remplacer','Rouillé / corrodé','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'Accessibilité, modifications prévues...', type:'textarea' },
+      ]},
+      { id:'ec_arrivee', label:'Arrivée eau chaude', warning:false, questions:[
+        { key:'position', label:'Position actuelle', ph:'Emplacement dans la pièce' },
+        { key:'source', label:'Source eau chaude', type:'select', opts:['Chauffe-eau cave','Chauffe-eau mural','Ballon électrique','Chaudière','Inconnu'] },
+        { key:'delai', label:'Délai eau chaude au robinet', ph:'Ex: 20 secondes, immédiat...' },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'chauffe_eau', label:'Chauffe-eau', warning:true, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Ballon électrique','Chauffe-eau thermodynamique','Chaudière gaz','Autre','Inconnu'] },
+        { key:'capacite', label:'Capacité (litres)', ph:'Ex: 100, 150, 200...' },
+        { key:'emplacement', label:'Emplacement', ph:'Cave, placard, garage...' },
+        { key:'annee', label:'Année approximative', ph:'Ex: 2010, inconnu...' },
+        { key:'etat', label:'État', type:'select', opts:['Bon état','À surveiller','À remplacer','Inconnu'] },
+        { key:'modif', label:'Modification prévue', ph:'Ajout d\'un appoint, déplacement...', type:'textarea' },
+      ]},
+      { id:'evacuation', label:'Évacuation principale', warning:true, questions:[
+        { key:'position', label:'Position et tracé', ph:'Sous plancher, dans le mur...' },
+        { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 40, 50, 100...' },
+        { key:'pente', label:'Pente suffisante', type:'select', opts:['Oui','Non / à corriger','Non vérifiable','Inconnu'] },
+        { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Difficile','Sous plancher','Encastré'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'siphon_sol', label:'Siphon de sol', warning:false, questions:[
+        { key:'present', label:'Présence', type:'select', opts:['Oui existant','Non — à créer','Non — non prévu'] },
+        { key:'position', label:'Position', ph:'Angle, centre, sous douche...' },
+        { key:'etat', label:'État', type:'select', opts:['Bon état','Bouché','À remplacer','N/A'] },
+      ]},
+      { id:'wc', label:'WC', warning:false, questions:[
+        { key:'type', label:'Type actuel', type:'select', opts:['Sol classique','Suspendu','Non présent dans cette pièce'] },
+        { key:'cible', label:'Type souhaité', type:'select', opts:['Sol classique','Suspendu','Bâti-support à créer','Inchangé'] },
+        { key:'position', label:'Position cible', ph:'Angle gauche, face entrée...' },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'machine_laver', label:'Machine à laver', warning:true, questions:[
+        { key:'prevue', label:'Intégration prévue', type:'select', opts:['Oui — à intégrer','Existante','Non prévue'] },
+        { key:'arrivee', label:'Arrivée eau possible', type:'select', opts:['Oui facile','À créer','Difficile','Inconnu'] },
+        { key:'evacuation', label:'Évacuation possible', type:'select', opts:['Oui siphon proche','À créer','Difficile','Inconnu'] },
+        { key:'position', label:'Emplacement cible', ph:'Sous le meuble, encastrée...', },
+      ]},
+    ]
+  },
+  {
+    id:'electricite', icon:'⚡', title:'Électricité',
+    items: [
+      { id:'tableau', label:'Tableau électrique', warning:true, questions:[
+        { key:'position', label:'Emplacement', ph:'Hall, cave, couloir...' },
+        { key:'distance', label:'Distance du chantier', ph:'Ex: 5m, 15m...' },
+        { key:'dispos', label:'Disjoncteurs disponibles', type:'select', opts:['Oui — plusieurs libres','Un seul libre','Tableau plein','Inconnu'] },
+        { key:'age', label:'Âge / état', type:'select', opts:['Récent et conforme','Ancien — à évaluer','À remplacer','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'circuit_ddie', label:'Circuit dédié salle de bain', warning:true, questions:[
+        { key:'present', label:'Circuit dédié existant', type:'select', opts:['Oui','Non','Inconnu'] },
+        { key:'section', label:'Section du câble', ph:'Ex: 2,5mm², 1,5mm²...' },
+        { key:'conforme', label:'Conformité NF C 15-100', type:'select', opts:['Conforme','Non conforme — à refaire','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'prises', label:'Prises existantes', warning:false, questions:[
+        { key:'nombre', label:'Nombre actuel', ph:'Ex: 2, 0...' },
+        { key:'zones', label:'Zones de sécurité respectées', type:'select', opts:['Oui','Non — à déplacer','Inconnu'] },
+        { key:'cible', label:'Nombre souhaité', ph:'Ex: 3 prises côté vasque...' },
+      ]},
+      { id:'luminaires', label:'Luminaires', warning:false, questions:[
+        { key:'type', label:'Type actuel', ph:'Plafonnier, spots, applique...' },
+        { key:'zone_humide', label:'Zone humide — conformité IP65', type:'select', opts:['Conforme','Non conforme','Non concerné','Inconnu'] },
+        { key:'cible', label:'Souhaits éclairage', ph:'Spots encastrés, LED, miroir éclairant...' },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'seche_serviette', label:'Sèche-serviette', warning:false, questions:[
+        { key:'type', label:'Type prévu', type:'select', opts:['Électrique','Eau chaude / hydraulique','Existant à conserver','Non prévu'] },
+        { key:'puissance', label:'Puissance estimée', ph:'Ex: 750W, 1000W...' },
+        { key:'position', label:'Position', ph:'Mur gauche, face porte...' },
+      ]},
+    ]
+  },
+  {
+    id:'ventilation', icon:'💨', title:'Ventilation',
+    items: [
+      { id:'vmc', label:'VMC existante', warning:true, questions:[
+        { key:'type', label:'Type', type:'select', opts:['VMC simple flux','VMC double flux','Aérateur simple','Aucune','Inconnu'] },
+        { key:'bouche', label:'Position de la bouche', ph:'Plafond, mur haut...' },
+        { key:'etat', label:'Fonctionnement', type:'select', opts:['Fonctionne bien','Faible débit','Ne fonctionne pas','Inconnu'] },
+        { key:'gaine', label:'Tracé de la gaine', ph:'Vers toit, combles, gaine existante...', type:'textarea' },
+      ]},
+      { id:'fenetre_sdb', label:'Fenêtre / ouverture', warning:false, questions:[
+        { key:'present', label:'Présence', type:'select', opts:['Oui','Non'] },
+        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60x90...' },
+        { key:'ouvrant', label:'Ouvrant', type:'select', opts:['Oui','Non / fixe'] },
+      ]},
+    ]
+  },
+  {
+    id:'cloisons', icon:'🧱', title:'Cloisons & structure',
+    items: [
+      { id:'type_cloisons', label:'Type de cloisons', warning:true, questions:[
+        { key:'materiau', label:'Matériau', type:'select', opts:['Placo BA13','Brique creuse','Béton','Pierre','Mixte','Inconnu'] },
+        { key:'epaisseur', label:'Épaisseur (cm)', ph:'Ex: 7, 10, 20...' },
+        { key:'isolation', label:'Isolation intégrée', type:'select', opts:['Oui','Non','Inconnu'] },
+      ]},
+      { id:'mur_porteur', label:'Murs porteurs', warning:true, questions:[
+        { key:'identifie', label:'Mur porteur identifié dans la zone', type:'select', opts:['Oui — à respecter','Non / aucun','À vérifier par un pro','Inconnu'] },
+        { key:'demol', label:'Démolition prévue sur un mur porteur', type:'select', opts:['Non','Oui — étude structure nécessaire','Incertain'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'modif_cloisons', label:'Modifications de cloisons prévues', warning:false, questions:[
+        { key:'demolition', label:'Cloison(s) à démolir', ph:'Quelle cloison, dimensions estimées...' },
+        { key:'creation', label:'Cloison(s) à créer', ph:'Emplacement, dimensions, avec porte ?' },
+        { key:'ouverture', label:'Ouverture(s) à créer dans mur existant', ph:'Porte, passage, dimensions...' },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'hsp', label:'Hauteur sous plafond', warning:false, questions:[
+        { key:'hauteur', label:'Hauteur (cm)', ph:'Ex: 250, 230...' },
+        { key:'contraintes', label:'Contraintes plafond', ph:'Poutre, gaine, décrochés...' },
+        { key:'faux_plafond', label:'Faux plafond prévu', type:'select', opts:['Non','Oui — entier','Oui — partiel'] },
+      ]},
+    ]
+  },
+  {
+    id:'sols', icon:'⬜', title:'Sol & revêtements',
+    items: [
+      { id:'sol_existant', label:'Sol existant', warning:true, questions:[
+        { key:'type', label:'Type actuel', type:'select', opts:['Carrelage','Parquet','Lino / PVC','Béton brut','Chape','Autre'] },
+        { key:'etat', label:'État', type:'select', opts:['Bon — récupérable','Abîmé — à déposer','À évaluer'] },
+        { key:'parquet_recup', label:'Récupération parquet envisagée', type:'select', opts:['Oui si possible','Non — à déposer','N/A'] },
+        { key:'niveau', label:'Niveau / planéité', type:'select', opts:['Plan et de niveau','Quelques défauts','Très irrégulier'] },
+      ]},
+      { id:'sol_cible', label:'Revêtement souhaité', warning:false, questions:[
+        { key:'type', label:'Type cible', type:'select', opts:['Carrelage','Carrelage grand format','Parquet','Béton ciré','Résine','À définir'] },
+        { key:'format', label:'Format / dimensions', ph:'Ex: 60x60, 30x60...' },
+        { key:'style', label:'Style / couleur', ph:'Blanc, gris clair, effet bois...' },
+      ]},
+      { id:'zone_douche', label:'Zone douche / receveur', warning:false, questions:[
+        { key:'type', label:'Type prévu', type:'select', opts:['Douche italienne','Receveur extra-plat','Receveur standard','Baignoire','À définir'] },
+        { key:'dims', label:'Dimensions cibles', ph:'Ex: 90x90, 80x120...' },
+        { key:'siphon_pos', label:'Position évacuation', ph:'Angle, centre, paroi...' },
+        { key:'niche', label:'Niche murale prévue', type:'select', opts:['Oui','Non','À voir'] },
+      ]},
+    ]
+  },
+  {
+    id:'ouvertures', icon:'🚪', title:'Ouvertures & menuiseries',
+    items: [
+      { id:'porte_existante', label:'Porte existante', warning:false, questions:[
+        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 73x204...' },
+        { key:'sens', label:'Sens d\'ouverture', type:'select', opts:['Droite intérieure','Gauche intérieure','Droite extérieure','Gauche extérieure'] },
+        { key:'etat', label:'État', type:'select', opts:['À conserver','À remplacer','À déplacer'] },
+      ]},
+      { id:'nouvelles_ouvertures', label:'Nouvelles ouvertures', warning:true, questions:[
+        { key:'description', label:'Description', ph:'Nouvelle porte WC, passage vers couloir...', type:'textarea' },
+        { key:'linteau', label:'Linteau nécessaire', type:'select', opts:['Non — cloison légère','Oui — mur porteur','À vérifier'] },
+        { key:'dims', label:'Dimensions souhaitées', ph:'Ex: 73x204, 83x204...' },
+      ]},
+      { id:'fenetre', label:'Fenêtre', warning:false, questions:[
+        { key:'present', label:'Présence', type:'select', opts:['Oui existante','Non','À créer'] },
+        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60x90...' },
+        { key:'vitrage', label:'Type vitrage', type:'select', opts:['Simple','Double','Triple','Inconnu'] },
+        { key:'etat', label:'État', type:'select', opts:['Bon','À remplacer','À vérifier'] },
+      ]},
+    ]
+  },
+  {
+    id:'equipements', icon:'🛁', title:'Équipements sanitaires',
+    items: [
+      { id:'douche', label:'Douche', warning:false, questions:[
+        { key:'type', label:'Type souhaité', type:'select', opts:['Italienne encastrée','Receveur extra-plat','Receveur standard','Baignoire','Baignoire îlot'] },
+        { key:'dims', label:'Dimensions souhaitées', ph:'Ex: 90x90, 80x120...' },
+        { key:'paroi', label:'Paroi / porte', type:'select', opts:['Paroi fixe','Porte coulissante','Porte pivotante','Aucune — effet pluie'] },
+        { key:'robinetterie', label:'Style robinetterie', ph:'Chromé, mat, noir, doré...' },
+      ]},
+      { id:'vasque', label:'Meuble vasque', warning:false, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Meuble suspendu','Meuble sur pieds','Plan vasque','Vasque à poser','À définir'] },
+        { key:'dims', label:'Largeur du meuble (cm)', ph:'Ex: 60, 80, 100, 120...' },
+        { key:'vasques', label:'Nombre de vasques', type:'select', opts:['1 vasque','2 vasques','Plan de vasque continu'] },
+        { key:'style', label:'Style', ph:'Blanc laqué, bois, béton...', },
+        { key:'rangements', label:'Rangements complémentaires', ph:'Colonne, armoire miroir, étagères...' },
+      ]},
+      { id:'miroir', label:'Miroir & éclairage vasque', warning:false, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Miroir simple','Miroir LED intégré','Armoire miroir','À définir'] },
+        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 80x60...' },
+        { key:'eclairage', label:'Éclairage intégré', type:'select', opts:['Oui','Non','À voir'] },
+      ]},
+    ]
+  },
+  {
+    id:'vigilance', icon:'⚠️', title:'Points de vigilance',
+    items: [
+      { id:'humidite', label:'Humidité / moisissures', warning:true, questions:[
+        { key:'present', label:'Traces visibles', type:'select', opts:['Non','Légères','Importantes','Très importantes'] },
+        { key:'localisation', label:'Localisation', ph:'Angle bas, sous fenêtre, plafond...' },
+        { key:'cause', label:'Cause probable', ph:'Condensation, infiltration, fuite...' },
+      ]},
+      { id:'amiante', label:'Risque amiante', warning:true, questions:[
+        { key:'annee', label:'Année de construction', ph:'Ex: 1975, avant 1997 ?', },
+        { key:'diagnostic', label:'Diagnostic amiante réalisé', type:'select', opts:['Oui — négatif','Oui — positif','Non — à faire','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'acces', label:'Accès chantier', warning:false, questions:[
+        { key:'escalier', label:'Type d\'accès', type:'select', opts:['Plain-pied facile','Escalier standard','Escalier étroit / en colimaçon','Ascenseur'] },
+        { key:'stationnement', label:'Stationnement matériaux', type:'select', opts:['Facile — devant','Difficile','Rue étroite','À organiser'] },
+        { key:'notes', label:'Notes', ph:'Portage difficile, voisinage...', type:'textarea' },
+      ]},
+      { id:'contraintes', label:'Contraintes particulières', warning:false, questions:[
+        { key:'copro', label:'Copropriété', type:'select', opts:['Non','Oui — règlement à vérifier','Oui — travaux déclarés'] },
+        { key:'horaires', label:'Horaires de travail imposés', ph:'Ex: 8h-18h, pas le samedi...' },
+        { key:'autres', label:'Autres contraintes', ph:'Personnes âgées, animaux, planning serré...', type:'textarea' },
+      ]},
+    ]
+  },
+];
+
+const SECTIONS_CUISINE = [
+  { id:'dims', icon:'📏', title:'Dimensions', type:'dimensions' },
+  {
+    id:'implantation', icon:'📐', title:'Implantation cuisine',
+    items: [
+      { id:'config', label:'Configuration actuelle', warning:false, questions:[
+        { key:'type', label:'Type de configuration', type:'select', opts:['Linéaire','En L','En U','Îlot central','Parallèle','Ouverte sur séjour'] },
+        { key:'surface', label:'Surface estimée (m²)', ph:'Ex: 8, 12, 20...' },
+        { key:'cible', label:'Configuration souhaitée', type:'select', opts:['Linéaire','En L','En U','Îlot central','Parallèle','Ouverte sur séjour','Inchangée'] },
+      ]},
+      { id:'cuisine_meublee', label:'Cuisine meublée', warning:false, questions:[
+        { key:'marque', label:'Marque / fournisseur cuisine', ph:'IKEA, Leroy Merlin, artisan menuisier...' },
+        { key:'commande', label:'Statut commande', type:'select', opts:['Commandée','À commander','À définir','Client gère'] },
+        { key:'pose', label:'Pose incluse dans le chantier', type:'select', opts:['Oui — Kusthome pose','Non — autre poseur','À définir'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+    ]
+  },
+  {
+    id:'plomberie_cuisine', icon:'🔧', title:'Plomberie cuisine',
+    items: [
+      { id:'evier', label:'Évier / évier double bac', warning:false, questions:[
+        { key:'type', label:'Type souhaité', type:'select', opts:['Simple bac','Double bac','Grande cuve','Sous-plan','À encastrer'] },
+        { key:'matiere', label:'Matière', type:'select', opts:['Inox','Céramique','Composite','À définir'] },
+        { key:'position', label:'Position dans la cuisine', ph:'Sous fenêtre, angle, îlot...' },
+        { key:'mitigeur', label:'Mitigeur', type:'select', opts:['Standard','Douchette extractible','Mitigeur haut','À définir'] },
+      ]},
+      { id:'arrivees_cuisine', label:'Arrivées eau', warning:true, questions:[
+        { key:'ef_pos', label:'Position arrivée eau froide', ph:'Sous évier, dans le mur...' },
+        { key:'ec_pos', label:'Position arrivée eau chaude', ph:'Sous évier, dans le mur...' },
+        { key:'etat', label:'État des arrivées', type:'select', opts:['Bon état','À remplacer','À créer','Inconnu'] },
+        { key:'lave_vaisselle', label:'Alimentation lave-vaisselle', type:'select', opts:['Existante','À créer','Non prévu'] },
+      ]},
+      { id:'evacuation_cuisine', label:'Évacuation cuisine', warning:true, questions:[
+        { key:'position', label:'Position évacuation', ph:'Sous évier, dans le mur, au sol...' },
+        { key:'diametre', label:'Diamètre', ph:'Ex: 40mm, 50mm...' },
+        { key:'siphon_lv', label:'Siphon lave-vaisselle', type:'select', opts:['Existant','À créer','Non prévu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+    ]
+  },
+  {
+    id:'electricite_cuisine', icon:'⚡', title:'Électricité cuisine',
+    items: [
+      { id:'tableau_cuisine', label:'Tableau électrique', warning:true, questions:[
+        { key:'position', label:'Emplacement', ph:'Couloir, garage, cave...' },
+        { key:'dispos', label:'Circuits disponibles', type:'select', opts:['Plusieurs libres','Un seul','Plein — à étendre','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'circuits_cuisine', label:'Circuits dédiés cuisine', warning:true, questions:[
+        { key:'four', label:'Circuit four dédié', type:'select', opts:['Existant conforme','À créer','Inconnu'] },
+        { key:'plaque', label:'Circuit plaque de cuisson', type:'select', opts:['Existant conforme','À créer','Inconnu'] },
+        { key:'frigo', label:'Circuit réfrigérateur', type:'select', opts:['Existant','À créer','Inconnu'] },
+        { key:'lv', label:'Circuit lave-vaisselle', type:'select', opts:['Existant','À créer','Non prévu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'prises_cuisine', label:'Prises de travail', warning:false, questions:[
+        { key:'nombre_cible', label:'Nombre souhaité côté plan de travail', ph:'Ex: 4, 6...' },
+        { key:'usb', label:'Prises USB intégrées', type:'select', opts:['Oui','Non','À voir'] },
+        { key:'hauteur', label:'Hauteur (cm)', ph:'Ex: 110cm du sol...' },
+      ]},
+      { id:'eclairage_cuisine', label:'Éclairage', warning:false, questions:[
+        { key:'plafond', label:'Éclairage plafond', ph:'Spots, plafonnier, suspension...' },
+        { key:'plan_travail', label:'Éclairage plan de travail', type:'select', opts:['LED ruban sous meuble','Spots orientables','Non prévu','À définir'] },
+        { key:'ilot', label:'Éclairage îlot (si prévu)', ph:'Suspension, spots...' },
+      ]},
+    ]
+  },
+  {
+    id:'electromenager', icon:'🍳', title:'Électroménager',
+    items: [
+      { id:'plaque', label:'Plaque de cuisson', warning:true, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Induction','Vitrocéramique','Gaz réseau','Gaz bouteille','À définir'] },
+        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60, 75, 90...' },
+        { key:'gaz_bouteille', label:'Si gaz bouteille — emplacement prévu', ph:'Cave, placard extérieur, garage...' },
+        { key:'notes', label:'Notes', ph:'Tuyau gaz, détendeur, ventilation nécessaire...', type:'textarea' },
+      ]},
+      { id:'four', label:'Four', warning:false, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Encastrable standard','Encastrable vapeur','Combiné micro-ondes','À poser','Non prévu'] },
+        { key:'position', label:'Position dans les meubles', ph:'Colonne haute, sous plan, à hauteur des yeux...' },
+      ]},
+      { id:'hotte', label:'Hotte aspirante', warning:true, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Evacuation extérieure','Recyclage','Îlot','Integrable meuble haut','À définir'] },
+        { key:'evacuation_hotte', label:'Évacuation extérieure possible', type:'select', opts:['Oui — gaine existante','Oui — à créer','Non — recyclage obligatoire','Inconnu'] },
+        { key:'tracé', label:'Tracé de la gaine prévu', ph:'Vers mur extérieur, par combles...', type:'textarea' },
+      ]},
+      { id:'frigo', label:'Réfrigérateur', warning:false, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Encastrable','Pose libre intégré','Américain','Sous plan','À définir'] },
+        { key:'dims', label:'Espace réservé (cm)', ph:'Ex: 60 de large, 200 de haut...' },
+      ]},
+      { id:'lave_vaisselle', label:'Lave-vaisselle', warning:false, questions:[
+        { key:'type', label:'Type', type:'select', opts:['Encastrable 60cm','Encastrable 45cm','Pose libre','Non prévu'] },
+        { key:'position', label:'Position', ph:'À droite de l\'évier, en colonne...' },
+      ]},
+    ]
+  },
+  {
+    id:'cloisons_cuisine', icon:'🧱', title:'Cloisons & structure',
+    items: [
+      { id:'ouverture_cuisine', label:'Ouverture vers pièce adjacente', warning:true, questions:[
+        { key:'type', label:'Type de modification', type:'select', opts:['Cuisine ouverte — abattre cloison','Agrandissement ouverture','Aucune modification','Création passage'] },
+        { key:'mur_type', label:'Type de mur à modifier', type:'select', opts:['Cloison placo','Brique','Béton — étude nécessaire','Pierre — étude nécessaire','Inconnu'] },
+        { key:'linteau', label:'Linteau nécessaire', type:'select', opts:['Non','Oui — à dimensionner','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'', type:'textarea' },
+      ]},
+      { id:'credence', label:'Crédence', warning:false, questions:[
+        { key:'type', label:'Type souhaité', type:'select', opts:['Carrelage','Verre laqué','Inox','Béton ciré','Stratifié','À définir'] },
+        { key:'dims', label:'Surface estimée (m²)', ph:'Ex: 2, 3...' },
+      ]},
+    ]
+  },
+  {
+    id:'sols_cuisine', icon:'⬜', title:'Sol & revêtements',
+    items: [
+      { id:'sol_cuisine', label:'Sol existant', warning:true, questions:[
+        { key:'type', label:'Type actuel', type:'select', opts:['Carrelage','Parquet','Lino / PVC','Béton','Autre'] },
+        { key:'etat', label:'État', type:'select', opts:['Bon — à conserver','Abîmé — à déposer','À évaluer'] },
+        { key:'niveau', label:'Niveau / raccord avec pièces adjacentes', type:'select', opts:['Même niveau — pas de souci','Différence — à gérer','À vérifier'] },
+      ]},
+      { id:'sol_cuisine_cible', label:'Revêtement souhaité', warning:false, questions:[
+        { key:'type', label:'Type cible', type:'select', opts:['Carrelage','Grand format','Parquet','LVT / Vinyle','Béton ciré','À définir'] },
+        { key:'style', label:'Style / couleur', ph:'Blanc, gris, bois clair, noir...' },
+        { key:'continuite', label:'Continuité avec pièce adjacente', type:'select', opts:['Oui — même sol','Non — joint de transition','À définir'] },
+      ]},
+    ]
+  },
+  {
+    id:'vigilance_cuisine', icon:'⚠️', title:'Points de vigilance',
+    items: [
+      { id:'gaz_securite', label:'Gaz — sécurité', warning:true, questions:[
+        { key:'type', label:'Type installation gaz prévue', type:'select', opts:['Gaz réseau — plombier gaz certifié','Bouteille propane — installateur certifié','Aucun gaz','Non défini'] },
+        { key:'ventilation', label:'Ventilation de la pièce (obligatoire si gaz)', type:'select', opts:['Suffisante','Insuffisante — à créer','Inconnu'] },
+        { key:'notes', label:'Notes', ph:'À sous-traiter obligatoirement...', type:'textarea' },
+      ]},
+      { id:'humidite_cuisine', label:'Humidité / infiltrations', warning:true, questions:[
+        { key:'present', label:'Traces visibles', type:'select', opts:['Non','Légères','Importantes'] },
+        { key:'localisation', label:'Localisation', ph:'Sous évier, mur extérieur...' },
+      ]},
+      { id:'acces_cuisine', label:'Accès chantier', warning:false, questions:[
+        { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Escalier standard','Escalier étroit','À anticiper'] },
+        { key:'livraison', label:'Livraison cuisine', ph:'Portage, étage, ascenseur...', type:'textarea' },
+      ]},
+    ]
+  },
+];
+
+// Merge for "complet"
+function getSectionsForType(type) {
+  if (type === 'sdb') return SECTIONS_SDB;
+  if (type === 'cuisine') return SECTIONS_CUISINE;
+  if (type === 'complet') return [...SECTIONS_SDB, ...SECTIONS_CUISINE.filter(s => !['dims'].includes(s.id))];
+  return SECTIONS_SDB;
+}
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+
+let state = {
+  type: 'sdb',
+  client: '', adresse: '', date: '', bien: '', notes: '',
+  dims: { l: '', w: '', h: '', note: '' },
+  checks: {},
+  details: {},
+};
+
+// ══════════════════════════════════════
+// HOME
+// ══════════════════════════════════════
+
+document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+
+function selectType(type, el) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.type = type;
+}
+
+function goToChecklist() {
+  state.client = document.getElementById('f-client').value || 'Client';
+  state.adresse = document.getElementById('f-adresse').value || '';
+  state.date = document.getElementById('f-date').value || '';
+  state.bien = document.getElementById('f-bien').value || '';
+  state.notes = document.getElementById('f-notes').value || '';
+  document.getElementById('cl-subtitle').textContent = state.client;
+  buildChecklist();
+  showScreen('screen-checklist');
+}
+
+// ══════════════════════════════════════
+// BUILD CHECKLIST
+// ══════════════════════════════════════
+
+function buildChecklist() {
+  const sections = getSectionsForType(state.type);
+  const container = document.getElementById('checklist-content');
+  container.innerHTML = '';
+
+  sections.forEach((section, si) => {
+    const card = document.createElement('div');
+    card.className = 'section-card' + (si === 0 ? ' open' : '');
+    card.id = 'sc-' + section.id;
+
+    if (section.type === 'dimensions') {
+      card.innerHTML = `
+        <div class="section-card-header" onclick="toggleSection('${section.id}')">
+          <span class="section-icon">${section.icon}</span>
+          <span class="section-name">${section.title}</span>
+          <span class="section-chevron">▼</span>
+        </div>
+        <div class="section-body">
+          <p style="font-size:12px;color:var(--muted);padding:12px 0 10px">Dimensions de la pièce en centimètres</p>
+          <div class="dim-grid">
+            <div class="dim-field"><span class="dim-label">Longueur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.l=this.value;updateProgress()"></div>
+            <div class="dim-field"><span class="dim-label">Largeur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.w=this.value;updateProgress()"></div>
+            <div class="dim-field"><span class="dim-label">Hauteur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.h=this.value;updateProgress()"></div>
+          </div>
+          <div style="margin-top:14px">
+            <p style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Notes dimensions</p>
+            <textarea class="dq-textarea" placeholder="Angles non droits, alcôves, poutres, recoins..." rows="2" oninput="state.dims.note=this.value"></textarea>
+          </div>
+        </div>`;
+    } else {
+      const itemsHTML = section.items.map(item => {
+        if (!state.checks[item.id]) state.checks[item.id] = false;
+        if (!state.details[item.id]) state.details[item.id] = { status: null };
+
+        const questionsHTML = item.questions.map(q => {
+          const key = item.id + '_' + q.key;
+          if (!state.details[key]) state.details[key] = '';
+          if (q.type === 'select') {
+            return `<div class="dq-item">
+              <div class="dq-label">${q.label}</div>
+              <select class="dq-select" onchange="state.details['${key}']=this.value">
+                <option value="">— Choisir —</option>
+                ${q.opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+              </select>
+            </div>`;
+          } else if (q.type === 'textarea') {
+            return `<div class="dq-item">
+              <div class="dq-label">${q.label}</div>
+              <textarea class="dq-textarea" placeholder="${q.ph||''}" rows="2" oninput="state.details['${key}']=this.value"></textarea>
+            </div>`;
+          } else {
+            return `<div class="dq-item">
+              <div class="dq-label">${q.label}</div>
+              <input class="dq-input" type="text" placeholder="${q.ph||''}" oninput="state.details['${key}']=this.value">
+            </div>`;
+          }
+        }).join('');
+
+        return `
+        <div class="check-item">
+          <div class="check-top" onclick="toggleCheck('${item.id}')">
+            <div class="check-box ${item.warning?'warning':''}" id="cb-${item.id}"></div>
+            <div style="flex:1">
+              <div class="check-name">${item.label}</div>
+            </div>
+          </div>
+          <div class="detail-panel" id="dp-${item.id}">
+            <div class="status-row">
+              <button class="status-btn ok" onclick="setStatus('${item.id}','ok',event)">✓ OK</button>
+              <button class="status-btn warn" onclick="setStatus('${item.id}','warn',event)">⚠ À surveiller</button>
+              <button class="status-btn ko" onclick="setStatus('${item.id}','ko',event)">✗ Problème</button>
+            </div>
+            <div class="detail-questions">${questionsHTML}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      const total = section.items.length;
+      card.innerHTML = `
+        <div class="section-card-header" onclick="toggleSection('${section.id}')">
+          <span class="section-icon">${section.icon}</span>
+          <span class="section-name">${section.title}</span>
+          <span class="section-badge" id="badge-${section.id}">0/${total}</span>
+          <span class="section-chevron">▼</span>
+        </div>
+        <div class="section-body"><div style="padding-top:6px">${itemsHTML}</div></div>`;
+    }
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function toggleSection(id) {
+  document.getElementById('sc-' + id).classList.toggle('open');
+}
+
+function toggleCheck(id) {
+  state.checks[id] = !state.checks[id];
+  const box = document.getElementById('cb-' + id);
+  box.classList.toggle('checked', state.checks[id]);
+  const dp = document.getElementById('dp-' + id);
+  dp.classList.toggle('visible', state.checks[id]);
+  updateProgress();
+  updateBadges();
+}
+
+function setStatus(id, status, e) {
+  e.stopPropagation();
+  state.details[id] = state.details[id] || {};
+  state.details[id].status = status;
+  const row = document.querySelector(`#dp-${id} .status-row`);
+  row.querySelectorAll('.status-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.classList.contains(status)) b.classList.add('active');
+  });
+}
+
+function updateProgress() {
+  const sections = getSectionsForType(state.type);
+  let total = 0, done = 0;
+  sections.forEach(s => {
+    if (s.items) { total += s.items.length; done += s.items.filter(i => state.checks[i.id]).length; }
+  });
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('cl-progress-text').textContent = done + ' / ' + total;
+}
+
+function updateBadges() {
+  const sections = getSectionsForType(state.type);
+  sections.forEach(s => {
+    if (!s.items) return;
+    const done = s.items.filter(i => state.checks[i.id]).length;
+    const badge = document.getElementById('badge-' + s.id);
+    if (badge) { badge.textContent = done + '/' + s.items.length; badge.className = 'section-badge' + (done === s.items.length ? ' done' : ''); }
+  });
+}
+
+// ══════════════════════════════════════
+// RAPPORT
+// ══════════════════════════════════════
+
+function goToRapport() {
+  buildRapport();
+  showScreen('screen-rapport');
+}
+
+function buildRapport() {
+  const sections = getSectionsForType(state.type);
+  const container = document.getElementById('rapport-content');
+  const dateStr = state.date ? new Date(state.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : new Date().toLocaleDateString('fr-FR');
+  document.getElementById('rp-date').textContent = dateStr;
+
+  let total=0, done=0, warns=0, kos=0;
+  sections.forEach(s => {
+    if (s.items) {
+      total += s.items.length;
+      s.items.forEach(i => {
+        if (state.checks[i.id]) {
+          done++;
+          const st = state.details[i.id]?.status;
+          if (st === 'warn') warns++;
+          if (st === 'ko') kos++;
+        }
+      });
+    }
+  });
+
+  let html = `<div class="stat-row">
+    <div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Points relevés</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--yellow)">${warns}</div><div class="stat-label">À surveiller</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--red)">${kos}</div><div class="stat-label">Problèmes</div></div>
+  </div>`;
+
+  // Dims
+  if (state.dims.l || state.dims.w || state.dims.h) {
+    const surf = (state.dims.l && state.dims.w) ? ((state.dims.l/100)*(state.dims.w/100)).toFixed(1)+' m²' : '—';
+    html += `<div class="rapport-block"><div class="rapport-title">📏 Dimensions</div>
+      ${state.dims.l?`<div class="rapport-item"><span class="r-dot">—</span>Longueur : ${state.dims.l} cm</div>`:''}
+      ${state.dims.w?`<div class="rapport-item"><span class="r-dot">—</span>Largeur : ${state.dims.w} cm</div>`:''}
+      ${state.dims.h?`<div class="rapport-item"><span class="r-dot">—</span>Hauteur : ${state.dims.h} cm</div>`:''}
+      <div class="rapport-item"><span class="r-dot">—</span>Surface estimée : ${surf}</div>
+      ${state.dims.note?`<div class="rapport-item"><span class="r-dot">—</span>${state.dims.note}</div>`:''}
+    </div>`;
+  }
+
+  sections.forEach(s => {
+    if (!s.items) return;
+    const checked = s.items.filter(i => state.checks[i.id]);
+    if (!checked.length) return;
+    let itemsHTML = checked.map(i => {
+      const st = state.details[i.id]?.status;
+      const dotCls = st==='ko'?'ko':st==='warn'?'warn':'';
+      const stLabel = st==='ok'?' ✓':st==='warn'?' ⚠':st==='ko'?' ✗':'';
+      const dets = i.questions.map(q => {
+        const key = i.id+'_'+q.key;
+        const val = state.details[key];
+        return val ? `<span class="r-detail">${q.label} : ${val}</span>` : '';
+      }).join('');
+      return `<div class="rapport-item"><span class="r-dot ${dotCls}">—</span>${i.label}${stLabel}${dets}</div>`;
+    }).join('');
+    html += `<div class="rapport-block"><div class="rapport-title">${s.icon} ${s.title}</div>${itemsHTML}</div>`;
+  });
+
+  // Points bloquants
+  const koPts = [];
+  sections.forEach(s => { if (s.items) s.items.forEach(i => { if (state.checks[i.id] && state.details[i.id]?.status==='ko') koPts.push(i.label); }); });
+  if (koPts.length) {
+    html += `<div class="rapport-block" style="border-color:rgba(224,112,96,0.4)"><div class="rapport-title" style="color:var(--red)">🚨 Points bloquants</div>${koPts.map(p=>`<div class="rapport-item"><span class="r-dot ko">—</span>${p}</div>`).join('')}</div>`;
+  }
+
+  html += `<div class="divider"></div>
+  <div class="rapport-block">
+    <div class="rapport-title">🤖 Texte pour l'IA</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Copie et colle directement dans Claude pour générer la liste des tâches, matériaux et ébauche de devis.</p>
+    <div class="copy-area" id="ia-text">${buildIAText(sections)}</div>
+  </div>
+  <div class="info-note">Relevé Kusthome — Maxime Leclair</div>`;
+
+  container.innerHTML = html;
+}
+
+function buildIAText(sections) {
+  const dateStr = state.date ? new Date(state.date).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+  let txt = `RELEVÉ DE CHANTIER — ${state.type.toUpperCase()}\nClient : ${state.client}\nAdresse : ${state.adresse}\nDate : ${dateStr}\n`;
+  if (state.bien) txt += `Type de bien : ${state.bien}\n`;
+  txt += '\n';
+  if (state.notes) txt += `CONTEXTE / SOUHAITS CLIENT :\n${state.notes}\n\n`;
+
+  if (state.dims.l || state.dims.w) {
+    txt += `DIMENSIONS :\n`;
+    if (state.dims.l) txt += `- Longueur : ${state.dims.l} cm\n`;
+    if (state.dims.w) txt += `- Largeur : ${state.dims.w} cm\n`;
+    if (state.dims.h) txt += `- Hauteur : ${state.dims.h} cm\n`;
+    if (state.dims.l && state.dims.w) txt += `- Surface : ${((state.dims.l/100)*(state.dims.w/100)).toFixed(1)} m²\n`;
+    if (state.dims.note) txt += `- Notes : ${state.dims.note}\n`;
+    txt += '\n';
+  }
+
+  sections.forEach(s => {
+    if (!s.items) return;
+    const checked = s.items.filter(i => state.checks[i.id]);
+    if (!checked.length) return;
+    txt += `${s.title.toUpperCase()} :\n`;
+    checked.forEach(i => {
+      const st = state.details[i.id]?.status;
+      const stLabel = st==='ok'?'[OK]':st==='warn'?'[À SURVEILLER]':st==='ko'?'[PROBLÈME]':'[RELEVÉ]';
+      txt += `- ${i.label} ${stLabel}\n`;
+      i.questions.forEach(q => {
+        const val = state.details[i.id+'_'+q.key];
+        if (val) txt += `  · ${q.label} : ${val}\n`;
+      });
+    });
+    txt += '\n';
+  });
+
+  txt += `---\nSur la base de ce relevé, merci de me générer :\n1. La liste complète des tâches par corps de métier dans l'ordre chronologique\n2. Les matériaux et équipements à prévoir avec quantités estimées\n3. Les points de vigilance et risques prioritaires\n4. Une ébauche de devis structurée par poste`;
+  return txt;
+}
+
+function copyRapport() {
+  const text = document.getElementById('ia-text').textContent;
+  const btn = document.querySelector('#screen-rapport .btn-primary');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => { btn.textContent = '✓ Copié !'; setTimeout(()=>btn.textContent='📋 Copier pour l\'IA',2000); });
+  } else {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent = '✓ Copié !'; setTimeout(()=>btn.textContent='📋 Copier pour l\'IA',2000);
+  }
+}
+
+function newReleve() {
+  state = { type:'sdb', client:'', adresse:'', date:'', bien:'', notes:'', dims:{l:'',w:'',h:'',note:''}, checks:{}, details:{} };
+  document.getElementById('f-client').value=''; document.getElementById('f-adresse').value='';
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('f-bien').value=''; document.getElementById('f-notes').value='';
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('type-sdb').classList.add('selected');
+  showScreen('screen-home');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
