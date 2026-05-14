@@ -43,7 +43,7 @@
   }
 
   /* SCREENS */
-  .screen { display: none; min-height: 100vh; flex-direction: column; padding-bottom: 100px; }
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
   .screen.active { display: flex; }
 
   /* TOPBAR */
@@ -83,7 +83,7 @@
   }
 
   /* CONTENT */
-  .content { flex: 1; padding: 20px 16px; overflow-y: auto; }
+  .content { flex: 1; padding: 20px 16px 120px; overflow-y: auto; }
 
   /* ═════════ HOME SCREEN ═════════ */
   .home-header {
@@ -504,6 +504,32 @@
     margin-top: 2px;
   }
 
+  /* VOICE BTN */
+  .voice-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-soft);
+    border: 1.5px solid var(--gold-light);
+    color: var(--gold-dark);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 8px;
+    transition: all 0.15s;
+  }
+  .voice-btn.recording {
+    background: #fbe8e3;
+    border-color: var(--red);
+    color: var(--red);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
   /* DELETE BTN */
   .delete-btn {
     position: absolute;
@@ -856,14 +882,17 @@
       <div class="section-body">
         <div class="field-group" style="padding-top: 12px">
           <label class="field-label">Démolition / création de cloisons</label>
+          <button class="voice-btn" onclick="startVoice('mod-cloisons', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mod-cloisons" placeholder="Cloison à abattre, nouvelle cloison, dimensions..." oninput="updateModif('cloisons', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Modifications menuiseries</label>
+          <button class="voice-btn" onclick="startVoice('mod-menuiseries', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mod-menuiseries" placeholder="Portes, fenêtres à créer, déplacer, remplacer..." oninput="updateModif('menuiseries', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Déplacement équipements / aménagement</label>
+          <button class="voice-btn" onclick="startVoice('mod-amenagement', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mod-amenagement" placeholder="Nouveaux emplacements, reconfigurations..." oninput="updateModif('amenagement', this.value)"></textarea>
         </div>
       </div>
@@ -874,15 +903,19 @@
       <div class="section-body">
         <div class="field-group" style="padding-top: 12px">
           <label class="field-label">Indispensables</label>
+          <button class="voice-btn" onclick="startVoice('sou-indispensables', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="sou-indispensables" placeholder="Ce que le client veut absolument..." oninput="updateModif('indispensables', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">À bannir</label>
+          <button class="voice-btn" onclick="startVoice('sou-banir', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="sou-banir" placeholder="Matériaux, styles, couleurs à éviter..." oninput="updateModif('banir', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Style souhaité</label>
+          <button class="voice-btn" onclick="startVoice('sou-style-voice', this)">🎤 Dicter</button>
           <input class="field-input" id="sou-style" type="text" placeholder="Moderne, industriel, scandinave, campagne..." oninput="updateModif('style', this.value)">
+          <textarea class="field-textarea" id="sou-style-voice" style="display:none" oninput="document.getElementById('sou-style').value=this.value; updateModif('style', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Photos d'inspiration</label>
@@ -896,6 +929,7 @@
       <div class="section-body">
         <div class="field-group" style="padding-top: 12px">
           <label class="field-label">Points bloquants à surveiller</label>
+          <button class="voice-btn" onclick="startVoice('con-bloquants', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="con-bloquants" placeholder="Difficultés techniques identifiées..." oninput="updateModif('bloquants', this.value)"></textarea>
         </div>
         <div class="field-group">
@@ -910,14 +944,17 @@
       <div class="section-body">
         <div class="field-group" style="padding-top: 12px">
           <label class="field-label">Sol / Mur / Plafond</label>
+          <button class="voice-btn" onclick="startVoice('mat-revetements', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mat-revetements" placeholder="Carrelage XYZ, parquet chêne, peinture..." oninput="updateModif('revetements', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Équipements sanitaires / cuisine</label>
+          <button class="voice-btn" onclick="startVoice('mat-equipements', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mat-equipements" placeholder="Douche italienne 90cm, WC suspendu..." oninput="updateModif('equipements', this.value)"></textarea>
         </div>
         <div class="field-group">
           <label class="field-label">Robinetterie, finitions, couleurs</label>
+          <button class="voice-btn" onclick="startVoice('mat-finitions', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mat-finitions" placeholder="Mitigeur noir mat, poignée laiton..." oninput="updateModif('finitions', this.value)"></textarea>
         </div>
       </div>
@@ -927,6 +964,7 @@
       <div class="section-card-header"><span class="section-icon">📝</span><span class="section-name">Notes libres</span><span class="section-chevron">▼</span></div>
       <div class="section-body">
         <div class="field-group" style="padding-top: 12px">
+          <button class="voice-btn" onclick="startVoice('mod-notes', this)">🎤 Dicter</button>
           <textarea class="field-textarea" id="mod-notes" placeholder="Tout ce qui ne rentre pas dans les autres catégories..." style="min-height: 120px" oninput="updateModif('notes', this.value)"></textarea>
         </div>
       </div>
@@ -952,56 +990,52 @@
   <div class="content">
     <div class="section-title-block">
       <h2>Génère tes livrables</h2>
-      <p>Tous les textes prêts à coller</p>
+      <p>Textes prêts à coller dans Claude ou ChatGPT</p>
     </div>
 
     <div class="stats-row" id="exports-stats"></div>
 
+    <!-- PROMPT PRINCIPAL -->
     <div class="section-card open">
-      <div class="section-card-header"><span class="section-icon">🤖</span><span class="section-name">Prompt — Devis & tâches</span></div>
+      <div class="section-card-header"><span class="section-icon">🤖</span><span class="section-name">Prompt complet pour l'IA</span></div>
       <div class="section-body">
-        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">À coller dans Claude pour obtenir la liste des tâches, matériaux et ébauche de devis.</p>
-        <div class="copy-text" id="prompt-devis" style="max-height: 200px;"></div>
-        <button class="copy-btn" onclick="copyExport('prompt-devis', this)">📋 Copier le prompt</button>
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0 12px;">Contexte du projet + toutes les modifications détaillées. À coller dans Claude ou ChatGPT pour obtenir liste de tâches, matériaux et devis.</p>
+        <div class="copy-text" id="prompt-complet" style="max-height: 320px;"></div>
+        <button class="copy-btn" id="btn-complet" onclick="copyExport('prompt-complet', this)">📋 Copier le prompt</button>
       </div>
     </div>
 
+    <!-- PROMPT RENDU VISUEL -->
     <div class="section-card">
-      <div class="section-card-header"><span class="section-icon">🎨</span><span class="section-name">Prompt — Rendu IA visuel</span><span class="section-chevron">▼</span></div>
+      <div class="section-card-header"><span class="section-icon">🎨</span><span class="section-name">Prompt — Rendu visuel (ChatGPT)</span><span class="section-chevron">▼</span></div>
       <div class="section-body">
-        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">À coller dans ChatGPT en joignant une photo de la pièce existante.</p>
-        <div class="copy-text" id="prompt-rendu" style="max-height: 200px;"></div>
-        <button class="copy-btn" onclick="copyExport('prompt-rendu', this)">📋 Copier le prompt</button>
-        <p style="font-size: 11px; color: var(--gold-dark); margin-top: 10px; text-align: center; font-style: italic;">⚠️ N'oublie pas de joindre la photo de l'existant à ChatGPT.</p>
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0 12px;">À coller dans ChatGPT avec une photo de la pièce existante en pièce jointe.</p>
+        <div class="copy-text" id="prompt-rendu" style="max-height: 220px;"></div>
+        <button class="copy-btn" id="btn-rendu" onclick="copyExport('prompt-rendu', this)">📋 Copier le prompt</button>
+        <p style="font-size: 11px; color: var(--gold-dark); margin-top: 10px; text-align: center; font-style: italic;">⚠️ Joins la photo de la pièce à ChatGPT après avoir collé le prompt.</p>
       </div>
     </div>
 
+    <!-- RESUME SMS -->
     <div class="section-card">
-      <div class="section-card-header"><span class="section-icon">💬</span><span class="section-name">Résumé client — SMS</span><span class="section-chevron">▼</span></div>
+      <div class="section-card-header"><span class="section-icon">💬</span><span class="section-name">Résumé client — SMS / WhatsApp</span><span class="section-chevron">▼</span></div>
       <div class="section-body">
-        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Version courte à envoyer en partant.</p>
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0 12px;">Message court à envoyer en partant du RDV.</p>
         <div class="copy-text" id="resume-sms" style="max-height: 200px;"></div>
-        <button class="copy-btn" onclick="copyExport('resume-sms', this)">📋 Copier le SMS</button>
+        <button class="copy-btn" id="btn-sms" onclick="copyExport('resume-sms', this)">📋 Copier le SMS</button>
       </div>
     </div>
 
+    <!-- RESUME EMAIL -->
     <div class="section-card">
       <div class="section-card-header"><span class="section-icon">📧</span><span class="section-name">Résumé client — Email</span><span class="section-chevron">▼</span></div>
       <div class="section-body">
-        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Version complète professionnelle.</p>
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0 12px;">Version complète professionnelle.</p>
         <div class="copy-text" id="resume-email" style="max-height: 280px;"></div>
-        <button class="copy-btn" onclick="copyExport('resume-email', this)">📋 Copier l'email</button>
+        <button class="copy-btn" id="btn-email" onclick="copyExport('resume-email', this)">📋 Copier l'email</button>
       </div>
     </div>
 
-    <div class="section-card">
-      <div class="section-card-header"><span class="section-icon">📄</span><span class="section-name">Export complet du relevé</span><span class="section-chevron">▼</span></div>
-      <div class="section-body">
-        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Toutes les données du relevé sous forme structurée.</p>
-        <div class="copy-text" id="export-full" style="max-height: 280px;"></div>
-        <button class="copy-btn" onclick="copyExport('export-full', this)">📋 Copier l'export complet</button>
-      </div>
-    </div>
   </div>
   <div class="bottom-cta">
     <button class="btn-primary" onclick="goToOverview()">✓ Validé & retour</button>
@@ -1957,14 +1991,78 @@ function renderExports() {
     <div class="stat-box"><div class="stat-num" style="color: var(--red);">${kos}</div><div class="stat-label">Problèmes</div></div>
   `;
 
-  document.getElementById('prompt-devis').textContent = generatePromptDevis(r);
+  document.getElementById('prompt-complet').textContent = generatePromptComplet(r);
   document.getElementById('prompt-rendu').textContent = generatePromptRendu(r);
   document.getElementById('resume-sms').textContent = generateResumeSMS(r);
   document.getElementById('resume-email').textContent = generateResumeEmail(r);
-  document.getElementById('export-full').textContent = generateExportFull(r);
 }
 
-function generatePromptDevis(r) {
+function generatePromptComplet(r) {
+  const sections = TECH_SECTIONS[r.type] || TECH_SECTIONS.sdb;
+  const m = r.modifs || {};
+
+  let txt = `=== CONTEXTE DU PROJET ===\n`;
+  txt += `Type : ${typeLabel(r.type)}\n`;
+  txt += `Client : ${r.client.nom || 'Non renseigné'}\n`;
+  txt += `Adresse : ${r.client.adresse || 'Non renseignée'}\n`;
+  if (r.client.budgetMin || r.client.budgetMax) txt += `Budget : ${r.client.budgetMin||'?'} € — ${r.client.budgetMax||'?'} €\n`;
+  if (r.client.planning) txt += `Contraintes planning : ${r.client.planning}\n`;
+  txt += '\n';
+
+  if (r.dims.l || r.dims.w) {
+    txt += `Dimensions : `;
+    const parts = [];
+    if (r.dims.l) parts.push(`L ${r.dims.l}cm`);
+    if (r.dims.w) parts.push(`l ${r.dims.w}cm`);
+    if (r.dims.h) parts.push(`H ${r.dims.h}cm`);
+    txt += parts.join(' x ');
+    if (r.dims.l && r.dims.w) txt += ` (surface ~${((r.dims.l/100)*(r.dims.w/100)).toFixed(1)} m²)`;
+    txt += '\n';
+    if (r.dims.note) txt += `Notes géométrie : ${r.dims.note}\n`;
+    txt += '\n';
+  }
+
+  txt += `=== MODIFICATIONS À EFFECTUER ===\n`;
+  if (m.cloisons) txt += `\nCLOISONS :\n${m.cloisons}\n`;
+  if (m.menuiseries) txt += `\nMENUISERIES :\n${m.menuiseries}\n`;
+  if (m.amenagement) txt += `\nAMÉNAGEMENT :\n${m.amenagement}\n`;
+  if (m.equipements) txt += `\nÉQUIPEMENTS :\n${m.equipements}\n`;
+  if (m.revetements) txt += `\nREVÊTEMENTS (sol, mur, plafond) :\n${m.revetements}\n`;
+  if (m.finitions) txt += `\nFINITIONS / ROBINETTERIE :\n${m.finitions}\n`;
+
+  txt += `\n=== SOUHAITS CLIENT ===\n`;
+  if (m.indispensables) txt += `Indispensables : ${m.indispensables}\n`;
+  if (m.style) txt += `Style : ${m.style}\n`;
+  if (m.banir) txt += `À éviter : ${m.banir}\n`;
+
+  // Points de vigilance technique
+  const proблемы = [];
+  sections.forEach(s => {
+    if (!s.items) return;
+    s.items.forEach(i => {
+      const t = r.technique[s.id+'_'+i.id];
+      if (t && t.checked && (t.status === 'warn' || t.status === 'ko')) {
+        proблемы.push(`- ${i.label} [${t.status === 'ko' ? 'PROBLÈME' : 'À SURVEILLER'}]`);
+      }
+    });
+  });
+  if (proблемы.length) {
+    txt += `\n=== POINTS DE VIGILANCE ===\n${proблемы.join('\n')}\n`;
+  }
+  if (m.bloquants) txt += `\nPoints bloquants : ${m.bloquants}\n`;
+  if (m.notes) txt += `\nNotes complémentaires : ${m.notes}\n`;
+
+  txt += `\n=== DEMANDE ===\nSur la base de ce relevé, merci de générer :
+1. Liste complète des tâches par corps de métier dans l'ordre chronologique
+2. Liste des matériaux et fournitures avec quantités estimées
+3. Ébauche de devis structurée par poste (tarifs indicatifs)
+4. Points de vigilance prioritaires
+5. Planning prévisionnel global`;
+
+  return txt;
+}
+
+function generatePromptDevis(r) { return generatePromptComplet(r); }
   const sections = TECH_SECTIONS[r.type] || TECH_SECTIONS.sdb;
   let txt = `RELEVÉ DE CHANTIER — ${typeLabel(r.type).toUpperCase()}\n`;
   txt += `Client : ${r.client.nom || 'Non renseigné'}\n`;
@@ -2100,6 +2198,7 @@ function copyExport(elId, btn) {
   setTimeout(() => {
     btn.classList.remove('copied');
     const labels = {
+      'prompt-complet': '📋 Copier le prompt',
       'prompt-devis': '📋 Copier le prompt',
       'prompt-rendu': '📋 Copier le prompt',
       'resume-sms': '📋 Copier le SMS',
@@ -2111,7 +2210,82 @@ function copyExport(elId, btn) {
 }
 
 // ════════════════════════════════════════════════════════════
-// UTILITIES
+// VOICE RECOGNITION
+// ════════════════════════════════════════════════════════════
+
+let activeRecognition = null;
+let activeVoiceBtn = null;
+
+function startVoice(targetId, btn) {
+  // Stop any active recognition
+  if (activeRecognition) {
+    activeRecognition.stop();
+    if (activeVoiceBtn) {
+      activeVoiceBtn.textContent = '🎤 Dicter';
+      activeVoiceBtn.classList.remove('recording');
+    }
+    if (activeVoiceBtn === btn) {
+      activeRecognition = null;
+      activeVoiceBtn = null;
+      return;
+    }
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('⚠️ Dictée non supportée sur ce navigateur');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  const target = document.getElementById(targetId);
+  const existingText = target.value;
+
+  btn.textContent = '⏹ Arrêter';
+  btn.classList.add('recording');
+  activeVoiceBtn = btn;
+  activeRecognition = recognition;
+
+  let interim = '';
+
+  recognition.onresult = (event) => {
+    let finalText = '';
+    interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalText += event.results[i][0].transcript + ' ';
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    if (finalText) {
+      target.value = (existingText ? existingText + '\n' : '') + finalText.trim();
+      target.dispatchEvent(new Event('input'));
+    }
+  };
+
+  recognition.onerror = () => {
+    showToast('⚠️ Erreur micro — vérifie les permissions');
+    btn.textContent = '🎤 Dicter';
+    btn.classList.remove('recording');
+    activeRecognition = null;
+    activeVoiceBtn = null;
+  };
+
+  recognition.onend = () => {
+    btn.textContent = '🎤 Dicter';
+    btn.classList.remove('recording');
+    activeRecognition = null;
+    activeVoiceBtn = null;
+  };
+
+  recognition.start();
+}
+
 // ════════════════════════════════════════════════════════════
 
 function copyToClipboard(text) {
