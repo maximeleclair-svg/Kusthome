@@ -3,944 +3,2160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Relevé Chantier — Kusthome</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kusthome">
+<title>Kusthome — Relevé</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --dark: #141412;
-    --mid: #2a2a26;
-    --accent: #c8954a;
-    --accent2: #e8b86d;
-    --warm: #f5f0e8;
-    --surface: #1e1e1a;
-    --card: #252521;
-    --border: rgba(200,149,74,0.2);
-    --muted: #888880;
-    --green: #6ab187;
-    --red: #e07060;
-    --yellow: #e8c46a;
+    --bg: #fafaf7;
+    --bg-card: #ffffff;
+    --bg-soft: #f5f3ee;
+    --gold: #b8893a;
+    --gold-light: #d4a560;
+    --gold-dark: #8d6929;
+    --gold-soft: #faf3e3;
+    --text: #1c1c1a;
+    --text-soft: #5a5a55;
+    --text-muted: #8a8a82;
+    --border: #e8e3d6;
+    --border-strong: #d4cbb5;
+    --green: #5d8a5d;
+    --red: #b85c4a;
+    --yellow: #c89a3e;
+    --shadow-sm: 0 1px 3px rgba(28,28,26,0.05);
+    --shadow: 0 4px 16px rgba(28,28,26,0.08);
+    --shadow-lg: 0 8px 32px rgba(28,28,26,0.12);
   }
 
-  html, body { height: 100%; background: var(--dark); color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 15px; overflow-x: hidden; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; flex-direction: column; padding-bottom: 100px; }
   .screen.active { display: flex; }
 
   /* TOPBAR */
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px 14px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .topbar-brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); }
-  .topbar-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 1px; }
-  .topbar-right { font-size: 12px; color: var(--muted); text-align: right; }
+  .topbar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .back-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-soft);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border: none;
+    color: var(--gold);
+    font-size: 18px;
+    transition: background 0.15s;
+  }
+  .back-btn:active { background: var(--gold-soft); }
+  .topbar-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 20px; color: var(--gold); letter-spacing: 1px; }
+  .topbar-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: -2px; }
+  .topbar-right { font-size: 12px; color: var(--text-muted); }
 
-  .progress-bar { height: 3px; background: var(--mid); }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+  /* PROGRESS BAR */
+  .progress-bar { height: 3px; background: var(--border); }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.4s ease;
+  }
 
   /* CONTENT */
-  .content { flex: 1; padding: 20px 16px 120px; overflow-y: auto; }
+  .content { flex: 1; padding: 20px 16px; overflow-y: auto; }
 
-  /* HOME */
-  .hero { padding: 36px 20px 28px; text-align: center; }
-  .hero-icon { font-size: 44px; margin-bottom: 14px; }
-  .hero h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--accent); margin-bottom: 8px; }
-  .hero p { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 280px; margin: 0 auto; }
+  /* ═════════ HOME SCREEN ═════════ */
+  .home-header {
+    text-align: center;
+    padding: 32px 20px 24px;
+  }
+  .logo-icon {
+    width: 60px; height: 60px;
+    margin: 0 auto 12px;
+    display: block;
+  }
+  .home-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+  .home-tagline {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .home-divider {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    margin: 18px auto 0;
+    opacity: 0.5;
+  }
 
-  /* TYPE SELECTOR */
-  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-  .type-btn { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
-  .type-btn.selected { border-color: var(--accent); background: rgba(200,149,74,0.1); }
-  .type-btn .tb-icon { font-size: 24px; margin-bottom: 6px; }
-  .type-btn .tb-label { font-size: 13px; font-weight: 500; color: var(--warm); }
+  .home-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .home-section-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
 
-  /* FIELDS */
+  /* RELEVE CARDS */
+  .releve-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .releve-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .releve-card:active { transform: scale(0.99); }
+  .releve-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .releve-card-name { font-weight: 600; font-size: 16px; color: var(--text); }
+  .releve-card-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .releve-card-bottom { display: flex; justify-content: space-between; align-items: center; }
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .status-brouillon { background: #f5f3ee; color: #8a8a82; }
+  .status-releve { background: #faf3e3; color: var(--gold-dark); }
+  .status-devis { background: #e8efe8; color: var(--green); }
+  .status-encours { background: #fef5e7; color: #c89a3e; }
+  .status-fini { background: #e7ebef; color: #5a6a8a; }
+  .releve-card-arrow { color: var(--gold); font-size: 18px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* ═════════ FORMS ═════════ */
   .field-group { margin-bottom: 18px; }
-  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; display: block; }
-  .field-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
-  .field-input:focus { border-color: var(--accent); }
-  .field-input::placeholder { color: var(--muted); }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .field-input, .field-select, .field-textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 15px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.15s;
+    -webkit-appearance: none;
+  }
+  .field-input:focus, .field-select:focus, .field-textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184,137,58,0.1);
+  }
+  .field-input::placeholder, .field-textarea::placeholder { color: var(--text-muted); }
+  .field-textarea { min-height: 80px; resize: vertical; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* SECTION CARDS */
-  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
-  .section-card-header { padding: 16px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+  /* TYPE SELECTOR */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .type-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .type-btn.selected { border-color: var(--gold); background: var(--gold-soft); }
+  .type-btn .tb-icon { font-size: 24px; margin-bottom: 4px; }
+  .type-btn .tb-label { font-size: 12px; font-weight: 500; color: var(--text); }
+
+  /* ═════════ NAV TILES (sections of a releve) ═════════ */
+  .nav-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .nav-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    position: relative;
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-tile:active { transform: scale(0.98); }
+  .nav-tile.done { border-color: var(--gold); }
+  .nav-tile-top { display: flex; align-items: center; justify-content: space-between; }
+  .nav-tile-icon { font-size: 22px; }
+  .nav-tile-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    color: white;
+  }
+  .nav-tile.done .nav-tile-check { background: var(--gold); }
+  .nav-tile.done .nav-tile-check::after { content: '✓'; }
+  .nav-tile-num { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 8px; }
+  .nav-tile-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; margin-top: 2px; }
+
+  /* ═════════ SECTION CARDS (collapsible) ═════════ */
+  .section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-card-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
   .section-icon { font-size: 20px; }
-  .section-name { font-weight: 500; font-size: 15px; flex: 1; }
-  .section-badge { font-size: 11px; background: rgba(200,149,74,0.15); color: var(--accent); padding: 3px 8px; border-radius: 20px; font-weight: 600; }
-  .section-badge.done { background: rgba(106,177,135,0.15); color: var(--green); }
-  .section-chevron { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .section-name { font-weight: 600; font-size: 14px; flex: 1; color: var(--text); }
+  .section-badge {
+    font-size: 11px;
+    background: var(--bg-soft);
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .section-badge.partial { background: var(--gold-soft); color: var(--gold-dark); }
+  .section-badge.full { background: #e8efe8; color: var(--green); }
+  .section-chevron { color: var(--text-muted); font-size: 11px; transition: transform 0.2s; }
   .section-card.open .section-chevron { transform: rotate(180deg); }
-  .section-body { display: none; padding: 4px 18px 18px; border-top: 1px solid var(--border); }
+  .section-body { display: none; padding: 4px 16px 16px; border-top: 1px solid var(--border); }
   .section-card.open .section-body { display: block; }
 
   /* CHECK ITEMS */
-  .check-item { padding: 14px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .check-item { padding: 12px 0; border-bottom: 1px solid var(--bg-soft); }
   .check-item:last-child { border-bottom: none; }
   .check-top { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
-  .check-box { width: 26px; height: 26px; border: 2px solid var(--muted); border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 1px; }
-  .check-box.checked { background: var(--accent); border-color: var(--accent); }
-  .check-box.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: 700; }
-  .check-box.warning { border-color: var(--yellow); }
-  .check-box.warning.checked { background: var(--yellow); border-color: var(--yellow); }
-  .check-name { font-size: 15px; font-weight: 500; line-height: 1.4; flex: 1; }
-  .check-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .check-box {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border-strong);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    margin-top: 1px;
+    background: white;
+  }
+  .check-box.checked { background: var(--gold); border-color: var(--gold); }
+  .check-box.checked::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-name { font-size: 14px; font-weight: 500; line-height: 1.4; flex: 1; color: var(--text); }
 
   /* DETAIL PANEL */
-  .detail-panel { display: none; margin-top: 12px; margin-left: 38px; }
+  .detail-panel { display: none; margin-top: 12px; margin-left: 36px; padding-left: 12px; border-left: 2px solid var(--gold-soft); }
   .detail-panel.visible { display: block; }
 
   /* STATUS BTNS */
-  .status-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .status-btn { padding: 7px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-  .status-btn.ok.active { background: rgba(106,177,135,0.2); border-color: var(--green); color: var(--green); }
-  .status-btn.warn.active { background: rgba(232,196,106,0.2); border-color: var(--yellow); color: var(--yellow); }
-  .status-btn.ko.active { background: rgba(224,112,96,0.2); border-color: var(--red); color: var(--red); }
+  .status-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .status-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border-strong);
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .status-btn.ok.active { background: #e8efe8; border-color: var(--green); color: var(--green); }
+  .status-btn.warn.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold-dark); }
+  .status-btn.ko.active { background: #fbe8e3; border-color: var(--red); color: var(--red); }
 
   /* DETAIL QUESTIONS */
   .detail-questions { display: flex; flex-direction: column; gap: 10px; }
-  .dq-item { }
-  .dq-label { font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
-  .dq-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; -webkit-appearance: none; }
-  .dq-input:focus { border-color: var(--accent); }
-  .dq-input::placeholder { color: var(--muted); font-style: italic; }
-  .dq-textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; resize: none; min-height: 65px; -webkit-appearance: none; }
-  .dq-textarea:focus { border-color: var(--accent); }
-  .dq-textarea::placeholder { color: var(--muted); font-style: italic; }
-  .dq-select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--warm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; -webkit-appearance: none; }
+  .dq-label { font-size: 11px; color: var(--gold-dark); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+  .dq-input, .dq-select, .dq-textarea {
+    width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .dq-textarea { resize: none; min-height: 60px; }
+  .dq-input:focus, .dq-select:focus, .dq-textarea:focus { border-color: var(--gold); background: white; }
+  .dq-input::placeholder, .dq-textarea::placeholder { color: var(--text-muted); font-style: italic; }
 
   /* DIMENSIONS */
-  .dim-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .dim-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
   .dim-field { display: flex; flex-direction: column; gap: 4px; }
-  .dim-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .dim-input { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 8px; color: var(--warm); font-size: 16px; font-family: 'DM Sans', sans-serif; outline: none; text-align: center; -webkit-appearance: none; width: 100%; }
-  .dim-input:focus { border-color: var(--accent); }
-  .dim-input::placeholder { color: var(--muted); font-size: 11px; }
+  .dim-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+  .dim-input {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 8px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    text-align: center;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+  .dim-input:focus { border-color: var(--gold); background: white; }
 
-  /* BOTTOM CTA */
-  .bottom-cta { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px; background: linear-gradient(to top, var(--dark) 60%, transparent); padding-top: 32px; }
-  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--dark); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 16px; border: none; border-radius: 14px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; -webkit-appearance: none; }
-  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-  .btn-secondary { width: 100%; background: transparent; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 12px; border: 1px solid var(--border); border-radius: 14px; cursor: pointer; margin-top: 10px; -webkit-appearance: none; }
+  /* CHECKLIST MATOS */
+  .matos-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .matos-item.checked { background: var(--gold-soft); border-color: var(--gold-light); }
+  .matos-icon { font-size: 18px; }
+  .matos-label { font-size: 14px; flex: 1; color: var(--text); font-weight: 500; }
+  .matos-item.checked .matos-label { text-decoration: line-through; opacity: 0.7; }
 
-  /* RAPPORT */
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-  .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; text-align: center; }
-  .stat-num { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--accent); }
-  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-  .rapport-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
-  .rapport-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .rapport-item { font-size: 13px; color: var(--warm); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.5; }
-  .rapport-item:last-child { border-bottom: none; }
-  .r-dot { color: var(--accent); margin-right: 6px; }
-  .r-dot.warn { color: var(--yellow); }
-  .r-dot.ko { color: var(--red); }
-  .r-detail { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; margin-left: 14px; font-style: italic; }
-  .copy-area { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; color: var(--warm); line-height: 1.7; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; margin-bottom: 10px; max-height: 280px; overflow-y: auto; }
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-  .info-note { font-size: 11px; color: var(--muted); text-align: center; padding: 12px; font-style: italic; }
-  textarea { resize: none; }
+  .add-item-btn {
+    width: 100%;
+    background: transparent;
+    border: 1.5px dashed var(--border-strong);
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+  .add-item-btn:active { border-color: var(--gold); color: var(--gold); }
+
+  /* COPY BOX */
+  .copy-box {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .copy-text {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+  }
+  .copy-btn {
+    width: 100%;
+    background: var(--gold);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    -webkit-appearance: none;
+    letter-spacing: 0.3px;
+  }
+  .copy-btn:active { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--gold); }
+  .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* ═════════ BOTTOM CTA ═════════ */
+  .bottom-cta {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 14px 16px 20px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    z-index: 50;
+  }
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.1s;
+    -webkit-appearance: none;
+    box-shadow: 0 4px 12px rgba(184,137,58,0.3);
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.95; }
+
+  .btn-secondary {
+    width: 100%;
+    background: var(--bg-card);
+    color: var(--gold-dark);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    -webkit-appearance: none;
+  }
+
+  /* SECTION TITLE inside content */
+  .section-title-block {
+    margin-bottom: 16px;
+  }
+  .section-title-block h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .section-title-block p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* DELETE BTN */
+  .delete-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 2;
+  }
+  .delete-btn:active { color: var(--red); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 100px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(28,28,26,0.5);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 360px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--text-soft); margin-bottom: 18px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-btn.cancel { background: var(--bg-soft); color: var(--text-soft); }
+  .modal-btn.confirm { background: var(--red); color: white; }
 </style>
 </head>
 <body>
 
-<!-- ═══ SCREEN 1 : HOME ═══ -->
+<!-- ═══════════ SCREEN : HOME ═══════════ -->
 <div class="screen active" id="screen-home">
+  <div class="content">
+    <div class="home-header">
+      <!-- Logo Kusthome SVG -->
+      <svg class="logo-icon" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#d4a560"/>
+            <stop offset="100%" stop-color="#8d6929"/>
+          </linearGradient>
+        </defs>
+        <!-- House outline -->
+        <path d="M 40 8 L 70 35 L 70 70 L 10 70 L 10 35 Z" stroke="url(#goldGrad)" stroke-width="2.5" fill="none"/>
+        <!-- Inner K -->
+        <path d="M 28 28 L 28 60 M 28 44 L 50 28 M 28 44 L 50 60" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="home-title">KUSTHOME</div>
+      <div class="home-tagline">Rénover · Personnaliser · Sublimer</div>
+      <div class="home-divider"></div>
+    </div>
+
+    <div style="margin-top: 8px">
+      <h2 class="home-section-title">Mes relevés</h2>
+      <p class="home-section-sub">Consulte, modifie ou crée un nouveau relevé</p>
+    </div>
+
+    <div class="releve-list" id="releve-list"></div>
+  </div>
+
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="createNewReleve()">+ Nouveau relevé</button>
+  </div>
+</div>
+
+
+<!-- ═══════════ SCREEN : RELEVE OVERVIEW (tuiles) ═══════════ -->
+<div class="screen" id="screen-overview">
   <div class="topbar">
-    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub">Relevé de chantier</div></div>
-    <div class="topbar-right">Maxime Leclair</div>
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div>
+        <div class="topbar-title" id="ov-title">Relevé</div>
+        <div class="topbar-sub" id="ov-sub">En cours</div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="confirmDeleteCurrent()" style="background:transparent" title="Supprimer">🗑</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="ov-progress" style="width:0%"></div></div>
+
+  <div class="content">
+    <div class="nav-tiles">
+      <div class="nav-tile" onclick="goToSection('client')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">👤</span><span class="nav-tile-check" id="check-client"></span></div>
+        <div><div class="nav-tile-num">01</div><div class="nav-tile-title">Fiche client</div></div>
+      </div>
+      <div class="nav-tile" onclick="goToSection('message')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">✉️</span><span class="nav-tile-check" id="check-message"></span></div>
+        <div><div class="nav-tile-num">02</div><div class="nav-tile-title">Message pré-visite</div></div>
+      </div>
+      <div class="nav-tile" onclick="goToSection('matos')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">🧰</span><span class="nav-tile-check" id="check-matos"></span></div>
+        <div><div class="nav-tile-num">03</div><div class="nav-tile-title">Matériel à emporter</div></div>
+      </div>
+      <div class="nav-tile" onclick="goToSection('technique')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">📐</span><span class="nav-tile-check" id="check-technique"></span></div>
+        <div><div class="nav-tile-num">04</div><div class="nav-tile-title">Relevé technique</div></div>
+      </div>
+      <div class="nav-tile" onclick="goToSection('modifs')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">✏️</span><span class="nav-tile-check" id="check-modifs"></span></div>
+        <div><div class="nav-tile-num">05</div><div class="nav-tile-title">Modifs & souhaits</div></div>
+      </div>
+      <div class="nav-tile" onclick="goToSection('exports')">
+        <div class="nav-tile-top"><span class="nav-tile-icon">📤</span><span class="nav-tile-check" id="check-exports"></span></div>
+        <div><div class="nav-tile-num">06</div><div class="nav-tile-title">Exports & IA</div></div>
+      </div>
+    </div>
+
+    <!-- Statut du projet -->
+    <div class="section-card open" style="margin-top: 16px">
+      <div class="section-card-header">
+        <span class="section-icon">🏷️</span>
+        <span class="section-name">Statut du projet</span>
+      </div>
+      <div class="section-body">
+        <div style="padding-top: 12px">
+          <select class="field-select" id="proj-status" onchange="updateStatus()">
+            <option value="brouillon">📝 Brouillon</option>
+            <option value="releve">✅ Relevé fait</option>
+            <option value="devis">📄 Devis envoyé</option>
+            <option value="encours">🔨 En cours</option>
+            <option value="fini">🏁 Terminé</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="saveAndGoHome()">💾 Enregistrer & retour</button>
+  </div>
+</div>
+
+
+<!-- ═══════════ SCREEN : SECTION CLIENT ═══════════ -->
+<div class="screen" id="screen-client">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Fiche client</div>
+        <div class="topbar-sub">Section 01</div>
+      </div>
+    </div>
   </div>
   <div class="content">
-    <div class="hero">
-      <div class="hero-icon">📐</div>
-      <h1>Nouveau relevé</h1>
-      <p>Renseigne les infos du chantier pour démarrer</p>
+    <div class="section-title-block">
+      <h2>Informations du projet</h2>
+      <p>Renseigne les bases du chantier</p>
     </div>
 
     <div class="field-group">
-      <label class="field-label">Type de chantier</label>
+      <label class="field-label">Type de projet</label>
       <div class="type-grid">
-        <div class="type-btn selected" id="type-sdb" onclick="selectType('sdb', this)">
+        <div class="type-btn" data-type="sdb" onclick="selectProjectType('sdb', this)">
           <div class="tb-icon">🚿</div><div class="tb-label">Salle de bain</div>
         </div>
-        <div class="type-btn" id="type-cuisine" onclick="selectType('cuisine', this)">
+        <div class="type-btn" data-type="cuisine" onclick="selectProjectType('cuisine', this)">
           <div class="tb-icon">🍳</div><div class="tb-label">Cuisine</div>
         </div>
-        <div class="type-btn" id="type-complet" onclick="selectType('complet', this)">
+        <div class="type-btn" data-type="complet" onclick="selectProjectType('complet', this)">
           <div class="tb-icon">🏠</div><div class="tb-label">Rénovation complète</div>
         </div>
-        <div class="type-btn" id="type-autre" onclick="selectType('autre', this)">
+        <div class="type-btn" data-type="autre" onclick="selectProjectType('autre', this)">
           <div class="tb-icon">🔧</div><div class="tb-label">Autre</div>
         </div>
       </div>
     </div>
 
     <div class="field-group">
-      <label class="field-label">Client(s)</label>
-      <input class="field-input" id="f-client" type="text" placeholder="Nom du client" autocomplete="off">
+      <label class="field-label">Nom du client</label>
+      <input class="field-input" id="cli-nom" type="text" placeholder="Prénom et nom" autocomplete="off" oninput="updateClient('nom', this.value)">
     </div>
     <div class="field-group">
-      <label class="field-label">Adresse</label>
-      <input class="field-input" id="f-adresse" type="text" placeholder="Adresse du chantier" autocomplete="off">
+      <label class="field-label">Adresse du chantier</label>
+      <input class="field-input" id="cli-adresse" type="text" placeholder="Adresse complète" autocomplete="off" oninput="updateClient('adresse', this.value)">
     </div>
     <div class="field-row">
       <div class="field-group">
-        <label class="field-label">Date</label>
-        <input class="field-input" id="f-date" type="date">
+        <label class="field-label">Téléphone</label>
+        <input class="field-input" id="cli-tel" type="tel" placeholder="06..." oninput="updateClient('tel', this.value)">
       </div>
       <div class="field-group">
-        <label class="field-label">Type de bien</label>
-        <select class="field-input" id="f-bien">
-          <option value="">Choisir...</option>
-          <option>Maison individuelle</option>
-          <option>Appartement</option>
-          <option>Maison en pierre</option>
-          <option>Maison ossature bois</option>
-        </select>
+        <label class="field-label">Email</label>
+        <input class="field-input" id="cli-email" type="email" placeholder="email@..." oninput="updateClient('email', this.value)">
       </div>
     </div>
     <div class="field-group">
-      <label class="field-label">Contexte & souhaits client</label>
-      <textarea class="field-input" id="f-notes" rows="3" placeholder="Ce que le client veut, budget évoqué, contraintes..."></textarea>
+      <label class="field-label">Date du RDV</label>
+      <input class="field-input" id="cli-date" type="date" oninput="updateClient('date', this.value)">
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label">Budget min (€)</label>
+        <input class="field-input" id="cli-budget-min" type="number" placeholder="ex: 5000" inputmode="numeric" oninput="updateClient('budgetMin', this.value)">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Budget max (€)</label>
+        <input class="field-input" id="cli-budget-max" type="number" placeholder="ex: 10000" inputmode="numeric" oninput="updateClient('budgetMax', this.value)">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Contraintes planning</label>
+      <textarea class="field-textarea" id="cli-planning" placeholder="Dates à respecter, périodes à éviter..." oninput="updateClient('planning', this.value)"></textarea>
     </div>
   </div>
   <div class="bottom-cta">
-    <button class="btn-primary" onclick="goToChecklist()">Commencer le relevé →</button>
+    <button class="btn-primary" onclick="goToOverview()">✓ Valider & retour</button>
   </div>
 </div>
 
 
-<!-- ═══ SCREEN 2 : CHECKLIST ═══ -->
-<div class="screen" id="screen-checklist">
+<!-- ═══════════ SCREEN : MESSAGE PRE-VISITE ═══════════ -->
+<div class="screen" id="screen-message">
   <div class="topbar">
-    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub" id="cl-subtitle">Relevé</div></div>
-    <div class="topbar-right" id="cl-progress-text">0 / 0</div>
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Message pré-visite</div>
+        <div class="topbar-sub">Section 02</div>
+      </div>
+    </div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-  <div class="content" id="checklist-content"></div>
+  <div class="content">
+    <div class="section-title-block">
+      <h2>À envoyer avant le RDV</h2>
+      <p>Pour que le client prépare le terrain</p>
+    </div>
+
+    <div class="copy-box">
+      <div class="copy-text" id="msg-text"></div>
+      <button class="copy-btn" onclick="copyMessage()">📋 Copier le message</button>
+    </div>
+
+    <p style="font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.5;">
+      Le message se remplit automatiquement avec le prénom et la date<br>renseignés dans la fiche client.
+    </p>
+  </div>
   <div class="bottom-cta">
-    <button class="btn-primary" onclick="goToRapport()">Générer le rapport →</button>
+    <button class="btn-primary" onclick="markMessageDone()">✓ Message envoyé</button>
   </div>
 </div>
 
 
-<!-- ═══ SCREEN 3 : RAPPORT ═══ -->
-<div class="screen" id="screen-rapport">
+<!-- ═══════════ SCREEN : MATÉRIEL ═══════════ -->
+<div class="screen" id="screen-matos">
   <div class="topbar">
-    <div><div class="topbar-brand">Kusthome</div><div class="topbar-sub">Rapport de relevé</div></div>
-    <div class="topbar-right" id="rp-date"></div>
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Matériel</div>
+        <div class="topbar-sub">Section 03</div>
+      </div>
+    </div>
   </div>
-  <div class="content" id="rapport-content"></div>
+  <div class="content">
+    <div class="section-title-block">
+      <h2>Sac à préparer</h2>
+      <p>Coche ce que tu as pris avec toi</p>
+    </div>
+
+    <div id="matos-list"></div>
+    <button class="add-item-btn" onclick="addMatosItem()">+ Ajouter un élément</button>
+  </div>
   <div class="bottom-cta">
-    <button class="btn-primary" onclick="copyRapport()">📋 Copier pour l'IA</button>
-    <button class="btn-secondary" onclick="newReleve()">+ Nouveau relevé</button>
+    <button class="btn-primary" onclick="goToOverview()">✓ Validé & retour</button>
+  </div>
+</div>
+
+
+<!-- ═══════════ SCREEN : RELEVÉ TECHNIQUE ═══════════ -->
+<div class="screen" id="screen-technique">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Relevé technique</div>
+        <div class="topbar-sub" id="tech-sub">Section 04</div>
+      </div>
+    </div>
+    <div class="topbar-right" id="tech-progress">0 / 0</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="tech-fill" style="width:0%"></div></div>
+  <div class="content" id="technique-content"></div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="goToOverview()">✓ Validé & retour</button>
+  </div>
+</div>
+
+
+<!-- ═══════════ SCREEN : MODIFS & SOUHAITS ═══════════ -->
+<div class="screen" id="screen-modifs">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Modifs & souhaits</div>
+        <div class="topbar-sub">Section 05</div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="section-title-block">
+      <h2>Le projet du client</h2>
+      <p>Tout ce qui sera modifié et souhaité</p>
+    </div>
+
+    <div class="section-card open">
+      <div class="section-card-header"><span class="section-icon">🔨</span><span class="section-name">Modifications structurelles</span></div>
+      <div class="section-body">
+        <div class="field-group" style="padding-top: 12px">
+          <label class="field-label">Démolition / création de cloisons</label>
+          <textarea class="field-textarea" id="mod-cloisons" placeholder="Cloison à abattre, nouvelle cloison, dimensions..." oninput="updateModif('cloisons', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Modifications menuiseries</label>
+          <textarea class="field-textarea" id="mod-menuiseries" placeholder="Portes, fenêtres à créer, déplacer, remplacer..." oninput="updateModif('menuiseries', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Déplacement équipements / aménagement</label>
+          <textarea class="field-textarea" id="mod-amenagement" placeholder="Nouveaux emplacements, reconfigurations..." oninput="updateModif('amenagement', this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">⭐</span><span class="section-name">Souhaits client</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <div class="field-group" style="padding-top: 12px">
+          <label class="field-label">Indispensables</label>
+          <textarea class="field-textarea" id="sou-indispensables" placeholder="Ce que le client veut absolument..." oninput="updateModif('indispensables', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">À bannir</label>
+          <textarea class="field-textarea" id="sou-banir" placeholder="Matériaux, styles, couleurs à éviter..." oninput="updateModif('banir', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Style souhaité</label>
+          <input class="field-input" id="sou-style" type="text" placeholder="Moderne, industriel, scandinave, campagne..." oninput="updateModif('style', this.value)">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Photos d'inspiration</label>
+          <textarea class="field-textarea" id="sou-inspi" placeholder="Notes ou liens Pinterest / Instagram..." oninput="updateModif('inspi', this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">⚠️</span><span class="section-name">Contraintes techniques</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <div class="field-group" style="padding-top: 12px">
+          <label class="field-label">Points bloquants à surveiller</label>
+          <textarea class="field-textarea" id="con-bloquants" placeholder="Difficultés techniques identifiées..." oninput="updateModif('bloquants', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Travaux déjà réalisés récemment</label>
+          <textarea class="field-textarea" id="con-travaux" placeholder="Ce qui a été fait et ne doit pas être touché..." oninput="updateModif('travaux', this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">🧱</span><span class="section-name">Matériaux & équipements pressentis</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <div class="field-group" style="padding-top: 12px">
+          <label class="field-label">Sol / Mur / Plafond</label>
+          <textarea class="field-textarea" id="mat-revetements" placeholder="Carrelage XYZ, parquet chêne, peinture..." oninput="updateModif('revetements', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Équipements sanitaires / cuisine</label>
+          <textarea class="field-textarea" id="mat-equipements" placeholder="Douche italienne 90cm, WC suspendu..." oninput="updateModif('equipements', this.value)"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Robinetterie, finitions, couleurs</label>
+          <textarea class="field-textarea" id="mat-finitions" placeholder="Mitigeur noir mat, poignée laiton..." oninput="updateModif('finitions', this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">📝</span><span class="section-name">Notes libres</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <div class="field-group" style="padding-top: 12px">
+          <textarea class="field-textarea" id="mod-notes" placeholder="Tout ce qui ne rentre pas dans les autres catégories..." style="min-height: 120px" oninput="updateModif('notes', this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="goToOverview()">✓ Validé & retour</button>
+  </div>
+</div>
+
+
+<!-- ═══════════ SCREEN : EXPORTS & IA ═══════════ -->
+<div class="screen" id="screen-exports">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" onclick="goToOverview()">←</button>
+      <div>
+        <div class="topbar-title">Exports & IA</div>
+        <div class="topbar-sub">Section 06</div>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="section-title-block">
+      <h2>Génère tes livrables</h2>
+      <p>Tous les textes prêts à coller</p>
+    </div>
+
+    <div class="stats-row" id="exports-stats"></div>
+
+    <div class="section-card open">
+      <div class="section-card-header"><span class="section-icon">🤖</span><span class="section-name">Prompt — Devis & tâches</span></div>
+      <div class="section-body">
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">À coller dans Claude pour obtenir la liste des tâches, matériaux et ébauche de devis.</p>
+        <div class="copy-text" id="prompt-devis" style="max-height: 200px;"></div>
+        <button class="copy-btn" onclick="copyExport('prompt-devis', this)">📋 Copier le prompt</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">🎨</span><span class="section-name">Prompt — Rendu IA visuel</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">À coller dans ChatGPT en joignant une photo de la pièce existante.</p>
+        <div class="copy-text" id="prompt-rendu" style="max-height: 200px;"></div>
+        <button class="copy-btn" onclick="copyExport('prompt-rendu', this)">📋 Copier le prompt</button>
+        <p style="font-size: 11px; color: var(--gold-dark); margin-top: 10px; text-align: center; font-style: italic;">⚠️ N'oublie pas de joindre la photo de l'existant à ChatGPT.</p>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">💬</span><span class="section-name">Résumé client — SMS</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Version courte à envoyer en partant.</p>
+        <div class="copy-text" id="resume-sms" style="max-height: 200px;"></div>
+        <button class="copy-btn" onclick="copyExport('resume-sms', this)">📋 Copier le SMS</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">📧</span><span class="section-name">Résumé client — Email</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Version complète professionnelle.</p>
+        <div class="copy-text" id="resume-email" style="max-height: 280px;"></div>
+        <button class="copy-btn" onclick="copyExport('resume-email', this)">📋 Copier l'email</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-header"><span class="section-icon">📄</span><span class="section-name">Export complet du relevé</span><span class="section-chevron">▼</span></div>
+      <div class="section-body">
+        <p style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Toutes les données du relevé sous forme structurée.</p>
+        <div class="copy-text" id="export-full" style="max-height: 280px;"></div>
+        <button class="copy-btn" onclick="copyExport('export-full', this)">📋 Copier l'export complet</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-cta">
+    <button class="btn-primary" onclick="goToOverview()">✓ Validé & retour</button>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL CONFIRM -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Confirmer</h3>
+    <p id="modal-msg">Es-tu sûr ?</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-btn confirm" id="modal-confirm">Supprimer</button>
+    </div>
   </div>
 </div>
 
 
 <script>
-// ══════════════════════════════════════════════════════
-// SECTIONS DATA
-// ══════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// DATA — SECTIONS TECHNIQUES
+// ════════════════════════════════════════════════════════════
 
-const SECTIONS_SDB = [
-  { id:'dims', icon:'📏', title:'Dimensions', type:'dimensions' },
-  {
-    id:'plomberie', icon:'🔧', title:'Plomberie',
-    items: [
-      { id:'ef_arrivee', label:'Arrivée eau froide', warning:false, questions:[
-        { key:'position', label:'Position actuelle', ph:'Ex: sous vasque, dans le mur à gauche...' },
-        { key:'diametre', label:'Diamètre (en mm)', ph:'Ex: 16, 20...' },
-        { key:'etat', label:'État général', type:'select', opts:['Bon état','À remplacer','Rouillé / corrodé','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'Accessibilité, modifications prévues...', type:'textarea' },
-      ]},
-      { id:'ec_arrivee', label:'Arrivée eau chaude', warning:false, questions:[
-        { key:'position', label:'Position actuelle', ph:'Emplacement dans la pièce' },
-        { key:'source', label:'Source eau chaude', type:'select', opts:['Chauffe-eau cave','Chauffe-eau mural','Ballon électrique','Chaudière','Inconnu'] },
-        { key:'delai', label:'Délai eau chaude au robinet', ph:'Ex: 20 secondes, immédiat...' },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'chauffe_eau', label:'Chauffe-eau', warning:true, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Ballon électrique','Chauffe-eau thermodynamique','Chaudière gaz','Autre','Inconnu'] },
-        { key:'capacite', label:'Capacité (litres)', ph:'Ex: 100, 150, 200...' },
-        { key:'emplacement', label:'Emplacement', ph:'Cave, placard, garage...' },
-        { key:'annee', label:'Année approximative', ph:'Ex: 2010, inconnu...' },
-        { key:'etat', label:'État', type:'select', opts:['Bon état','À surveiller','À remplacer','Inconnu'] },
-        { key:'modif', label:'Modification prévue', ph:'Ajout d\'un appoint, déplacement...', type:'textarea' },
-      ]},
-      { id:'evacuation', label:'Évacuation principale', warning:true, questions:[
-        { key:'position', label:'Position et tracé', ph:'Sous plancher, dans le mur...' },
-        { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 40, 50, 100...' },
-        { key:'pente', label:'Pente suffisante', type:'select', opts:['Oui','Non / à corriger','Non vérifiable','Inconnu'] },
-        { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Difficile','Sous plancher','Encastré'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'siphon_sol', label:'Siphon de sol', warning:false, questions:[
-        { key:'present', label:'Présence', type:'select', opts:['Oui existant','Non — à créer','Non — non prévu'] },
-        { key:'position', label:'Position', ph:'Angle, centre, sous douche...' },
-        { key:'etat', label:'État', type:'select', opts:['Bon état','Bouché','À remplacer','N/A'] },
-      ]},
-      { id:'wc', label:'WC', warning:false, questions:[
-        { key:'type', label:'Type actuel', type:'select', opts:['Sol classique','Suspendu','Non présent dans cette pièce'] },
-        { key:'cible', label:'Type souhaité', type:'select', opts:['Sol classique','Suspendu','Bâti-support à créer','Inchangé'] },
-        { key:'position', label:'Position cible', ph:'Angle gauche, face entrée...' },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'machine_laver', label:'Machine à laver', warning:true, questions:[
-        { key:'prevue', label:'Intégration prévue', type:'select', opts:['Oui — à intégrer','Existante','Non prévue'] },
-        { key:'arrivee', label:'Arrivée eau possible', type:'select', opts:['Oui facile','À créer','Difficile','Inconnu'] },
-        { key:'evacuation', label:'Évacuation possible', type:'select', opts:['Oui siphon proche','À créer','Difficile','Inconnu'] },
-        { key:'position', label:'Emplacement cible', ph:'Sous le meuble, encastrée...', },
-      ]},
-    ]
-  },
-  {
-    id:'electricite', icon:'⚡', title:'Électricité',
-    items: [
-      { id:'tableau', label:'Tableau électrique', warning:true, questions:[
-        { key:'position', label:'Emplacement', ph:'Hall, cave, couloir...' },
-        { key:'distance', label:'Distance du chantier', ph:'Ex: 5m, 15m...' },
-        { key:'dispos', label:'Disjoncteurs disponibles', type:'select', opts:['Oui — plusieurs libres','Un seul libre','Tableau plein','Inconnu'] },
-        { key:'age', label:'Âge / état', type:'select', opts:['Récent et conforme','Ancien — à évaluer','À remplacer','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'circuit_ddie', label:'Circuit dédié salle de bain', warning:true, questions:[
-        { key:'present', label:'Circuit dédié existant', type:'select', opts:['Oui','Non','Inconnu'] },
-        { key:'section', label:'Section du câble', ph:'Ex: 2,5mm², 1,5mm²...' },
-        { key:'conforme', label:'Conformité NF C 15-100', type:'select', opts:['Conforme','Non conforme — à refaire','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'prises', label:'Prises existantes', warning:false, questions:[
-        { key:'nombre', label:'Nombre actuel', ph:'Ex: 2, 0...' },
-        { key:'zones', label:'Zones de sécurité respectées', type:'select', opts:['Oui','Non — à déplacer','Inconnu'] },
-        { key:'cible', label:'Nombre souhaité', ph:'Ex: 3 prises côté vasque...' },
-      ]},
-      { id:'luminaires', label:'Luminaires', warning:false, questions:[
-        { key:'type', label:'Type actuel', ph:'Plafonnier, spots, applique...' },
-        { key:'zone_humide', label:'Zone humide — conformité IP65', type:'select', opts:['Conforme','Non conforme','Non concerné','Inconnu'] },
-        { key:'cible', label:'Souhaits éclairage', ph:'Spots encastrés, LED, miroir éclairant...' },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'seche_serviette', label:'Sèche-serviette', warning:false, questions:[
-        { key:'type', label:'Type prévu', type:'select', opts:['Électrique','Eau chaude / hydraulique','Existant à conserver','Non prévu'] },
-        { key:'puissance', label:'Puissance estimée', ph:'Ex: 750W, 1000W...' },
-        { key:'position', label:'Position', ph:'Mur gauche, face porte...' },
-      ]},
-    ]
-  },
-  {
-    id:'ventilation', icon:'💨', title:'Ventilation',
-    items: [
-      { id:'vmc', label:'VMC existante', warning:true, questions:[
-        { key:'type', label:'Type', type:'select', opts:['VMC simple flux','VMC double flux','Aérateur simple','Aucune','Inconnu'] },
-        { key:'bouche', label:'Position de la bouche', ph:'Plafond, mur haut...' },
-        { key:'etat', label:'Fonctionnement', type:'select', opts:['Fonctionne bien','Faible débit','Ne fonctionne pas','Inconnu'] },
-        { key:'gaine', label:'Tracé de la gaine', ph:'Vers toit, combles, gaine existante...', type:'textarea' },
-      ]},
-      { id:'fenetre_sdb', label:'Fenêtre / ouverture', warning:false, questions:[
-        { key:'present', label:'Présence', type:'select', opts:['Oui','Non'] },
-        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60x90...' },
-        { key:'ouvrant', label:'Ouvrant', type:'select', opts:['Oui','Non / fixe'] },
-      ]},
-    ]
-  },
-  {
-    id:'cloisons', icon:'🧱', title:'Cloisons & structure',
-    items: [
-      { id:'type_cloisons', label:'Type de cloisons', warning:true, questions:[
-        { key:'materiau', label:'Matériau', type:'select', opts:['Placo BA13','Brique creuse','Béton','Pierre','Mixte','Inconnu'] },
-        { key:'epaisseur', label:'Épaisseur (cm)', ph:'Ex: 7, 10, 20...' },
-        { key:'isolation', label:'Isolation intégrée', type:'select', opts:['Oui','Non','Inconnu'] },
-      ]},
-      { id:'mur_porteur', label:'Murs porteurs', warning:true, questions:[
-        { key:'identifie', label:'Mur porteur identifié dans la zone', type:'select', opts:['Oui — à respecter','Non / aucun','À vérifier par un pro','Inconnu'] },
-        { key:'demol', label:'Démolition prévue sur un mur porteur', type:'select', opts:['Non','Oui — étude structure nécessaire','Incertain'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'modif_cloisons', label:'Modifications de cloisons prévues', warning:false, questions:[
-        { key:'demolition', label:'Cloison(s) à démolir', ph:'Quelle cloison, dimensions estimées...' },
-        { key:'creation', label:'Cloison(s) à créer', ph:'Emplacement, dimensions, avec porte ?' },
-        { key:'ouverture', label:'Ouverture(s) à créer dans mur existant', ph:'Porte, passage, dimensions...' },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'hsp', label:'Hauteur sous plafond', warning:false, questions:[
-        { key:'hauteur', label:'Hauteur (cm)', ph:'Ex: 250, 230...' },
-        { key:'contraintes', label:'Contraintes plafond', ph:'Poutre, gaine, décrochés...' },
-        { key:'faux_plafond', label:'Faux plafond prévu', type:'select', opts:['Non','Oui — entier','Oui — partiel'] },
-      ]},
-    ]
-  },
-  {
-    id:'sols', icon:'⬜', title:'Sol & revêtements',
-    items: [
-      { id:'sol_existant', label:'Sol existant', warning:true, questions:[
-        { key:'type', label:'Type actuel', type:'select', opts:['Carrelage','Parquet','Lino / PVC','Béton brut','Chape','Autre'] },
-        { key:'etat', label:'État', type:'select', opts:['Bon — récupérable','Abîmé — à déposer','À évaluer'] },
-        { key:'parquet_recup', label:'Récupération parquet envisagée', type:'select', opts:['Oui si possible','Non — à déposer','N/A'] },
-        { key:'niveau', label:'Niveau / planéité', type:'select', opts:['Plan et de niveau','Quelques défauts','Très irrégulier'] },
-      ]},
-      { id:'sol_cible', label:'Revêtement souhaité', warning:false, questions:[
-        { key:'type', label:'Type cible', type:'select', opts:['Carrelage','Carrelage grand format','Parquet','Béton ciré','Résine','À définir'] },
-        { key:'format', label:'Format / dimensions', ph:'Ex: 60x60, 30x60...' },
-        { key:'style', label:'Style / couleur', ph:'Blanc, gris clair, effet bois...' },
-      ]},
-      { id:'zone_douche', label:'Zone douche / receveur', warning:false, questions:[
-        { key:'type', label:'Type prévu', type:'select', opts:['Douche italienne','Receveur extra-plat','Receveur standard','Baignoire','À définir'] },
-        { key:'dims', label:'Dimensions cibles', ph:'Ex: 90x90, 80x120...' },
-        { key:'siphon_pos', label:'Position évacuation', ph:'Angle, centre, paroi...' },
-        { key:'niche', label:'Niche murale prévue', type:'select', opts:['Oui','Non','À voir'] },
-      ]},
-    ]
-  },
-  {
-    id:'ouvertures', icon:'🚪', title:'Ouvertures & menuiseries',
-    items: [
-      { id:'porte_existante', label:'Porte existante', warning:false, questions:[
-        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 73x204...' },
-        { key:'sens', label:'Sens d\'ouverture', type:'select', opts:['Droite intérieure','Gauche intérieure','Droite extérieure','Gauche extérieure'] },
-        { key:'etat', label:'État', type:'select', opts:['À conserver','À remplacer','À déplacer'] },
-      ]},
-      { id:'nouvelles_ouvertures', label:'Nouvelles ouvertures', warning:true, questions:[
-        { key:'description', label:'Description', ph:'Nouvelle porte WC, passage vers couloir...', type:'textarea' },
-        { key:'linteau', label:'Linteau nécessaire', type:'select', opts:['Non — cloison légère','Oui — mur porteur','À vérifier'] },
-        { key:'dims', label:'Dimensions souhaitées', ph:'Ex: 73x204, 83x204...' },
-      ]},
-      { id:'fenetre', label:'Fenêtre', warning:false, questions:[
-        { key:'present', label:'Présence', type:'select', opts:['Oui existante','Non','À créer'] },
-        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60x90...' },
-        { key:'vitrage', label:'Type vitrage', type:'select', opts:['Simple','Double','Triple','Inconnu'] },
-        { key:'etat', label:'État', type:'select', opts:['Bon','À remplacer','À vérifier'] },
-      ]},
-    ]
-  },
-  {
-    id:'equipements', icon:'🛁', title:'Équipements sanitaires',
-    items: [
-      { id:'douche', label:'Douche', warning:false, questions:[
-        { key:'type', label:'Type souhaité', type:'select', opts:['Italienne encastrée','Receveur extra-plat','Receveur standard','Baignoire','Baignoire îlot'] },
-        { key:'dims', label:'Dimensions souhaitées', ph:'Ex: 90x90, 80x120...' },
-        { key:'paroi', label:'Paroi / porte', type:'select', opts:['Paroi fixe','Porte coulissante','Porte pivotante','Aucune — effet pluie'] },
-        { key:'robinetterie', label:'Style robinetterie', ph:'Chromé, mat, noir, doré...' },
-      ]},
-      { id:'vasque', label:'Meuble vasque', warning:false, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Meuble suspendu','Meuble sur pieds','Plan vasque','Vasque à poser','À définir'] },
-        { key:'dims', label:'Largeur du meuble (cm)', ph:'Ex: 60, 80, 100, 120...' },
-        { key:'vasques', label:'Nombre de vasques', type:'select', opts:['1 vasque','2 vasques','Plan de vasque continu'] },
-        { key:'style', label:'Style', ph:'Blanc laqué, bois, béton...', },
-        { key:'rangements', label:'Rangements complémentaires', ph:'Colonne, armoire miroir, étagères...' },
-      ]},
-      { id:'miroir', label:'Miroir & éclairage vasque', warning:false, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Miroir simple','Miroir LED intégré','Armoire miroir','À définir'] },
-        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 80x60...' },
-        { key:'eclairage', label:'Éclairage intégré', type:'select', opts:['Oui','Non','À voir'] },
-      ]},
-    ]
-  },
-  {
-    id:'vigilance', icon:'⚠️', title:'Points de vigilance',
-    items: [
-      { id:'humidite', label:'Humidité / moisissures', warning:true, questions:[
-        { key:'present', label:'Traces visibles', type:'select', opts:['Non','Légères','Importantes','Très importantes'] },
-        { key:'localisation', label:'Localisation', ph:'Angle bas, sous fenêtre, plafond...' },
-        { key:'cause', label:'Cause probable', ph:'Condensation, infiltration, fuite...' },
-      ]},
-      { id:'amiante', label:'Risque amiante', warning:true, questions:[
-        { key:'annee', label:'Année de construction', ph:'Ex: 1975, avant 1997 ?', },
-        { key:'diagnostic', label:'Diagnostic amiante réalisé', type:'select', opts:['Oui — négatif','Oui — positif','Non — à faire','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'acces', label:'Accès chantier', warning:false, questions:[
-        { key:'escalier', label:'Type d\'accès', type:'select', opts:['Plain-pied facile','Escalier standard','Escalier étroit / en colimaçon','Ascenseur'] },
-        { key:'stationnement', label:'Stationnement matériaux', type:'select', opts:['Facile — devant','Difficile','Rue étroite','À organiser'] },
-        { key:'notes', label:'Notes', ph:'Portage difficile, voisinage...', type:'textarea' },
-      ]},
-      { id:'contraintes', label:'Contraintes particulières', warning:false, questions:[
-        { key:'copro', label:'Copropriété', type:'select', opts:['Non','Oui — règlement à vérifier','Oui — travaux déclarés'] },
-        { key:'horaires', label:'Horaires de travail imposés', ph:'Ex: 8h-18h, pas le samedi...' },
-        { key:'autres', label:'Autres contraintes', ph:'Personnes âgées, animaux, planning serré...', type:'textarea' },
-      ]},
-    ]
-  },
-];
-
-const SECTIONS_CUISINE = [
-  { id:'dims', icon:'📏', title:'Dimensions', type:'dimensions' },
-  {
-    id:'implantation', icon:'📐', title:'Implantation cuisine',
-    items: [
-      { id:'config', label:'Configuration actuelle', warning:false, questions:[
-        { key:'type', label:'Type de configuration', type:'select', opts:['Linéaire','En L','En U','Îlot central','Parallèle','Ouverte sur séjour'] },
-        { key:'surface', label:'Surface estimée (m²)', ph:'Ex: 8, 12, 20...' },
-        { key:'cible', label:'Configuration souhaitée', type:'select', opts:['Linéaire','En L','En U','Îlot central','Parallèle','Ouverte sur séjour','Inchangée'] },
-      ]},
-      { id:'cuisine_meublee', label:'Cuisine meublée', warning:false, questions:[
-        { key:'marque', label:'Marque / fournisseur cuisine', ph:'IKEA, Leroy Merlin, artisan menuisier...' },
-        { key:'commande', label:'Statut commande', type:'select', opts:['Commandée','À commander','À définir','Client gère'] },
-        { key:'pose', label:'Pose incluse dans le chantier', type:'select', opts:['Oui — Kusthome pose','Non — autre poseur','À définir'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-    ]
-  },
-  {
-    id:'plomberie_cuisine', icon:'🔧', title:'Plomberie cuisine',
-    items: [
-      { id:'evier', label:'Évier / évier double bac', warning:false, questions:[
-        { key:'type', label:'Type souhaité', type:'select', opts:['Simple bac','Double bac','Grande cuve','Sous-plan','À encastrer'] },
-        { key:'matiere', label:'Matière', type:'select', opts:['Inox','Céramique','Composite','À définir'] },
-        { key:'position', label:'Position dans la cuisine', ph:'Sous fenêtre, angle, îlot...' },
-        { key:'mitigeur', label:'Mitigeur', type:'select', opts:['Standard','Douchette extractible','Mitigeur haut','À définir'] },
-      ]},
-      { id:'arrivees_cuisine', label:'Arrivées eau', warning:true, questions:[
-        { key:'ef_pos', label:'Position arrivée eau froide', ph:'Sous évier, dans le mur...' },
-        { key:'ec_pos', label:'Position arrivée eau chaude', ph:'Sous évier, dans le mur...' },
-        { key:'etat', label:'État des arrivées', type:'select', opts:['Bon état','À remplacer','À créer','Inconnu'] },
-        { key:'lave_vaisselle', label:'Alimentation lave-vaisselle', type:'select', opts:['Existante','À créer','Non prévu'] },
-      ]},
-      { id:'evacuation_cuisine', label:'Évacuation cuisine', warning:true, questions:[
-        { key:'position', label:'Position évacuation', ph:'Sous évier, dans le mur, au sol...' },
-        { key:'diametre', label:'Diamètre', ph:'Ex: 40mm, 50mm...' },
-        { key:'siphon_lv', label:'Siphon lave-vaisselle', type:'select', opts:['Existant','À créer','Non prévu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-    ]
-  },
-  {
-    id:'electricite_cuisine', icon:'⚡', title:'Électricité cuisine',
-    items: [
-      { id:'tableau_cuisine', label:'Tableau électrique', warning:true, questions:[
-        { key:'position', label:'Emplacement', ph:'Couloir, garage, cave...' },
-        { key:'dispos', label:'Circuits disponibles', type:'select', opts:['Plusieurs libres','Un seul','Plein — à étendre','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'circuits_cuisine', label:'Circuits dédiés cuisine', warning:true, questions:[
-        { key:'four', label:'Circuit four dédié', type:'select', opts:['Existant conforme','À créer','Inconnu'] },
-        { key:'plaque', label:'Circuit plaque de cuisson', type:'select', opts:['Existant conforme','À créer','Inconnu'] },
-        { key:'frigo', label:'Circuit réfrigérateur', type:'select', opts:['Existant','À créer','Inconnu'] },
-        { key:'lv', label:'Circuit lave-vaisselle', type:'select', opts:['Existant','À créer','Non prévu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'prises_cuisine', label:'Prises de travail', warning:false, questions:[
-        { key:'nombre_cible', label:'Nombre souhaité côté plan de travail', ph:'Ex: 4, 6...' },
-        { key:'usb', label:'Prises USB intégrées', type:'select', opts:['Oui','Non','À voir'] },
-        { key:'hauteur', label:'Hauteur (cm)', ph:'Ex: 110cm du sol...' },
-      ]},
-      { id:'eclairage_cuisine', label:'Éclairage', warning:false, questions:[
-        { key:'plafond', label:'Éclairage plafond', ph:'Spots, plafonnier, suspension...' },
-        { key:'plan_travail', label:'Éclairage plan de travail', type:'select', opts:['LED ruban sous meuble','Spots orientables','Non prévu','À définir'] },
-        { key:'ilot', label:'Éclairage îlot (si prévu)', ph:'Suspension, spots...' },
-      ]},
-    ]
-  },
-  {
-    id:'electromenager', icon:'🍳', title:'Électroménager',
-    items: [
-      { id:'plaque', label:'Plaque de cuisson', warning:true, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Induction','Vitrocéramique','Gaz réseau','Gaz bouteille','À définir'] },
-        { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60, 75, 90...' },
-        { key:'gaz_bouteille', label:'Si gaz bouteille — emplacement prévu', ph:'Cave, placard extérieur, garage...' },
-        { key:'notes', label:'Notes', ph:'Tuyau gaz, détendeur, ventilation nécessaire...', type:'textarea' },
-      ]},
-      { id:'four', label:'Four', warning:false, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Encastrable standard','Encastrable vapeur','Combiné micro-ondes','À poser','Non prévu'] },
-        { key:'position', label:'Position dans les meubles', ph:'Colonne haute, sous plan, à hauteur des yeux...' },
-      ]},
-      { id:'hotte', label:'Hotte aspirante', warning:true, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Evacuation extérieure','Recyclage','Îlot','Integrable meuble haut','À définir'] },
-        { key:'evacuation_hotte', label:'Évacuation extérieure possible', type:'select', opts:['Oui — gaine existante','Oui — à créer','Non — recyclage obligatoire','Inconnu'] },
-        { key:'tracé', label:'Tracé de la gaine prévu', ph:'Vers mur extérieur, par combles...', type:'textarea' },
-      ]},
-      { id:'frigo', label:'Réfrigérateur', warning:false, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Encastrable','Pose libre intégré','Américain','Sous plan','À définir'] },
-        { key:'dims', label:'Espace réservé (cm)', ph:'Ex: 60 de large, 200 de haut...' },
-      ]},
-      { id:'lave_vaisselle', label:'Lave-vaisselle', warning:false, questions:[
-        { key:'type', label:'Type', type:'select', opts:['Encastrable 60cm','Encastrable 45cm','Pose libre','Non prévu'] },
-        { key:'position', label:'Position', ph:'À droite de l\'évier, en colonne...' },
-      ]},
-    ]
-  },
-  {
-    id:'cloisons_cuisine', icon:'🧱', title:'Cloisons & structure',
-    items: [
-      { id:'ouverture_cuisine', label:'Ouverture vers pièce adjacente', warning:true, questions:[
-        { key:'type', label:'Type de modification', type:'select', opts:['Cuisine ouverte — abattre cloison','Agrandissement ouverture','Aucune modification','Création passage'] },
-        { key:'mur_type', label:'Type de mur à modifier', type:'select', opts:['Cloison placo','Brique','Béton — étude nécessaire','Pierre — étude nécessaire','Inconnu'] },
-        { key:'linteau', label:'Linteau nécessaire', type:'select', opts:['Non','Oui — à dimensionner','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'', type:'textarea' },
-      ]},
-      { id:'credence', label:'Crédence', warning:false, questions:[
-        { key:'type', label:'Type souhaité', type:'select', opts:['Carrelage','Verre laqué','Inox','Béton ciré','Stratifié','À définir'] },
-        { key:'dims', label:'Surface estimée (m²)', ph:'Ex: 2, 3...' },
-      ]},
-    ]
-  },
-  {
-    id:'sols_cuisine', icon:'⬜', title:'Sol & revêtements',
-    items: [
-      { id:'sol_cuisine', label:'Sol existant', warning:true, questions:[
-        { key:'type', label:'Type actuel', type:'select', opts:['Carrelage','Parquet','Lino / PVC','Béton','Autre'] },
-        { key:'etat', label:'État', type:'select', opts:['Bon — à conserver','Abîmé — à déposer','À évaluer'] },
-        { key:'niveau', label:'Niveau / raccord avec pièces adjacentes', type:'select', opts:['Même niveau — pas de souci','Différence — à gérer','À vérifier'] },
-      ]},
-      { id:'sol_cuisine_cible', label:'Revêtement souhaité', warning:false, questions:[
-        { key:'type', label:'Type cible', type:'select', opts:['Carrelage','Grand format','Parquet','LVT / Vinyle','Béton ciré','À définir'] },
-        { key:'style', label:'Style / couleur', ph:'Blanc, gris, bois clair, noir...' },
-        { key:'continuite', label:'Continuité avec pièce adjacente', type:'select', opts:['Oui — même sol','Non — joint de transition','À définir'] },
-      ]},
-    ]
-  },
-  {
-    id:'vigilance_cuisine', icon:'⚠️', title:'Points de vigilance',
-    items: [
-      { id:'gaz_securite', label:'Gaz — sécurité', warning:true, questions:[
-        { key:'type', label:'Type installation gaz prévue', type:'select', opts:['Gaz réseau — plombier gaz certifié','Bouteille propane — installateur certifié','Aucun gaz','Non défini'] },
-        { key:'ventilation', label:'Ventilation de la pièce (obligatoire si gaz)', type:'select', opts:['Suffisante','Insuffisante — à créer','Inconnu'] },
-        { key:'notes', label:'Notes', ph:'À sous-traiter obligatoirement...', type:'textarea' },
-      ]},
-      { id:'humidite_cuisine', label:'Humidité / infiltrations', warning:true, questions:[
-        { key:'present', label:'Traces visibles', type:'select', opts:['Non','Légères','Importantes'] },
-        { key:'localisation', label:'Localisation', ph:'Sous évier, mur extérieur...' },
-      ]},
-      { id:'acces_cuisine', label:'Accès chantier', warning:false, questions:[
-        { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Escalier standard','Escalier étroit','À anticiper'] },
-        { key:'livraison', label:'Livraison cuisine', ph:'Portage, étage, ascenseur...', type:'textarea' },
-      ]},
-    ]
-  },
-];
-
-// Merge for "complet"
-function getSectionsForType(type) {
-  if (type === 'sdb') return SECTIONS_SDB;
-  if (type === 'cuisine') return SECTIONS_CUISINE;
-  if (type === 'complet') return [...SECTIONS_SDB, ...SECTIONS_CUISINE.filter(s => !['dims'].includes(s.id))];
-  return SECTIONS_SDB;
-}
-
-// ══════════════════════════════════════
-// STATE
-// ══════════════════════════════════════
-
-let state = {
-  type: 'sdb',
-  client: '', adresse: '', date: '', bien: '', notes: '',
-  dims: { l: '', w: '', h: '', note: '' },
-  checks: {},
-  details: {},
+const TECH_SECTIONS = {
+  sdb: [
+    { id:'dims', icon:'📐', title:'Dimensions & géométrie', type:'dims' },
+    {
+      id:'geometrie', icon:'🧱', title:'Géométrie & structure',
+      items: [
+        { id:'angles', label:'Angles droits / pièce biscornue', questions:[
+          { key:'angles_desc', label:'Description', ph:'Angles particuliers...', type:'textarea' }
+        ]},
+        { id:'renfoncements', label:'Renfoncements, alcôves, décrochés', questions:[
+          { key:'desc', label:'Description', ph:'Position, dimensions...', type:'textarea' }
+        ]},
+        { id:'mur_type', label:'Type de mur', questions:[
+          { key:'nature', label:'Nature', type:'select', opts:['Porteur','Cloison','Mixte','Inconnu'] },
+          { key:'materiau', label:'Matériau', type:'select', opts:['Placo rails / montants','Placo polystyrène','Placo carton alvéolé','Brique','Béton','Pierre','Mixte','Inconnu'] },
+          { key:'isolation', label:'Isolation', type:'select', opts:['Oui','Non','Partielle','Inconnu'] },
+        ]},
+        { id:'plafond', label:'Plafond', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Plat standard','Faux plafond','Avec moulures','Pente / sous combles','Avec poutres apparentes'] },
+          { key:'notes', label:'Particularités', ph:'Détails...', type:'textarea' }
+        ]},
+        { id:'niveau_sol', label:'Niveaux de sol', questions:[
+          { key:'diff', label:'Différences avec pièces adjacentes', ph:'Ex: 2cm de différence couloir...' }
+        ]},
+      ]
+    },
+    {
+      id:'ouvertures', icon:'🚪', title:'Ouvertures',
+      items: [
+        { id:'porte', label:'Porte', questions:[
+          { key:'dims', label:'Dimensions L x H (cm)', ph:'Ex: 73x204' },
+          { key:'sens', label:'Sens d\'ouverture', type:'select', opts:['Droite intérieure','Gauche intérieure','Droite extérieure','Gauche extérieure'] },
+          { key:'etat', label:'État', type:'select', opts:['À conserver','À remplacer','À déplacer','À supprimer'] },
+        ]},
+        { id:'fenetre', label:'Fenêtre', questions:[
+          { key:'dims', label:'Dimensions L x H (cm)', ph:'Ex: 60x90' },
+          { key:'vitrage', label:'Vitrage', type:'select', opts:['Simple','Double','Triple','Inconnu'] },
+          { key:'ouvrant', label:'Ouvrant', type:'select', opts:['Oui','Fixe','Oscillo-battant'] },
+        ]},
+        { id:'velux', label:'Velux / lanterneau', questions:[
+          { key:'present', label:'Présence', type:'select', opts:['Oui existant','À créer','Non'] },
+          { key:'dims', label:'Dimensions', ph:'L x H...' }
+        ]},
+      ]
+    },
+    {
+      id:'plomberie', icon:'🔧', title:'Plomberie',
+      items: [
+        { id:'ef', label:'Arrivée eau froide', questions:[
+          { key:'position', label:'Position', ph:'Sous vasque, dans mur...' },
+          { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 16, 20...' },
+          { key:'materiau', label:'Matériau', type:'select', opts:['Cuivre','PER','Multicouche','PVC','Inconnu'] },
+        ]},
+        { id:'ec', label:'Arrivée eau chaude', questions:[
+          { key:'position', label:'Position', ph:'Emplacement' },
+          { key:'materiau', label:'Matériau', type:'select', opts:['Cuivre','PER','Multicouche','Inconnu'] },
+          { key:'source', label:'Source', type:'select', opts:['Chauffe-eau cave','Chauffe-eau mural','Ballon','Chaudière','Inconnu'] },
+          { key:'delai', label:'Délai eau chaude', ph:'Ex: 20 secondes...' },
+        ]},
+        { id:'evac', label:'Évacuations', questions:[
+          { key:'position', label:'Position', ph:'Tracé...' },
+          { key:'materiau', label:'Matériau', type:'select', opts:['PVC','Fonte','Cuivre','Inconnu'] },
+          { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 40, 50, 100...' }
+        ]},
+        { id:'chute', label:'Colonne de chute', questions:[
+          { key:'position', label:'Position', ph:'Localisation...' },
+          { key:'materiau', label:'Matériau', type:'select', opts:['PVC','Fonte','Inconnu'] },
+          { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 100, 125...' },
+        ]},
+        { id:'ce', label:'Chauffe-eau', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Ballon électrique','Thermodynamique','Chaudière gaz','Autre'] },
+          { key:'capacite', label:'Capacité (litres)', ph:'Ex: 150, 200...' },
+          { key:'emplacement', label:'Emplacement', ph:'Cave, garage...' },
+          { key:'etat', label:'État', type:'select', opts:['Bon','À surveiller','À remplacer','Inconnu'] },
+        ]},
+        { id:'siphon_sol', label:'Siphon de sol', questions:[
+          { key:'present', label:'Présence', type:'select', opts:['Oui existant','À créer','Non prévu'] },
+          { key:'position', label:'Position', ph:'Localisation' },
+          { key:'etat', label:'État', type:'select', opts:['Bon','À remplacer','N/A'] }
+        ]},
+        { id:'ml', label:'Machine à laver', questions:[
+          { key:'prevue', label:'Intégration', type:'select', opts:['Oui à créer','Existante','Non prévue'] },
+          { key:'arrivee', label:'Arrivée eau possible', type:'select', opts:['Oui facile','À créer','Difficile'] },
+          { key:'evac', label:'Évacuation', type:'select', opts:['Oui facile','À créer','Difficile'] }
+        ]},
+      ]
+    },
+    {
+      id:'elec', icon:'⚡', title:'Électricité',
+      items: [
+        { id:'abo', label:'Abonnement EDF', questions:[
+          { key:'puissance', label:'Puissance souscrite (kVA)', ph:'Ex: 9, 12, 15...' },
+          { key:'monophase', label:'Type', type:'select', opts:['Monophasé','Triphasé','Inconnu'] }
+        ]},
+        { id:'tableau', label:'Tableau électrique', questions:[
+          { key:'position', label:'Emplacement', ph:'Hall, cave...' },
+          { key:'distance', label:'Distance du chantier', ph:'Ex: 5m, 15m...' },
+          { key:'dispos', label:'Disjoncteurs disponibles', type:'select', opts:['Plusieurs libres','Un seul','Plein','Inconnu'] },
+          { key:'etat', label:'État général', type:'select', opts:['Récent conforme','Ancien à évaluer','À remplacer'] },
+        ]},
+        { id:'circuit_ddie', label:'Circuit dédié zone humide', questions:[
+          { key:'present', label:'Existant', type:'select', opts:['Oui','Non','Inconnu'] },
+          { key:'section', label:'Section câble', ph:'Ex: 2,5mm²...' },
+          { key:'conformite', label:'Conformité NFC 15-100', type:'select', opts:['Conforme','Non conforme','Inconnu'] }
+        ]},
+        { id:'prises', label:'Prises', questions:[
+          { key:'nombre', label:'Nombre actuel', ph:'Ex: 2...' },
+          { key:'cible', label:'Nombre souhaité', ph:'Ex: 4...' },
+          { key:'zones', label:'Zones humides respectées', type:'select', opts:['Oui','Non à déplacer','Inconnu'] }
+        ]},
+        { id:'interrupteurs', label:'Interrupteurs', questions:[
+          { key:'emplacements', label:'Emplacements souhaités', ph:'Va-et-vient, simple...', type:'textarea' }
+        ]},
+        { id:'luminaires', label:'Luminaires', questions:[
+          { key:'actuel', label:'Type actuel', ph:'Plafonnier, spots...' },
+          { key:'ip65', label:'Conformité IP65 zone humide', type:'select', opts:['Conforme','Non conforme','N/A'] },
+          { key:'cible', label:'Souhaits éclairage', ph:'LED, spots, miroir...', type:'textarea' }
+        ]},
+        { id:'circuits_d', label:'Circuits dédiés appareils', questions:[
+          { key:'liste', label:'Circuits à prévoir', ph:'Four, plaque, LL, LV...', type:'textarea' }
+        ]},
+        { id:'normes', label:'Mise aux normes nécessaire', questions:[
+          { key:'desc', label:'Description', ph:'Tout ce qui doit être mis aux normes...', type:'textarea' }
+        ]}
+      ]
+    },
+    {
+      id:'ventilation', icon:'💨', title:'Ventilation',
+      items: [
+        { id:'vmc', label:'VMC existante', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Simple flux','Double flux','Hygroréglable','Aucune','Inconnu'] },
+          { key:'bouche', label:'Position bouche', ph:'Plafond, mur haut...' },
+          { key:'etat', label:'Fonctionnement', type:'select', opts:['Fonctionne bien','Faible débit','Ne fonctionne pas','Inconnu'] }
+        ]},
+        { id:'gaine', label:'Gaine d\'évacuation', questions:[
+          { key:'trace', label:'Tracé', ph:'Vers toit, combles...', type:'textarea' },
+          { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 80, 100, 125...' },
+          { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Difficile','Encastré'] }
+        ]},
+        { id:'naturelle', label:'Ouverture naturelle', questions:[
+          { key:'present', label:'Présence', type:'select', opts:['Oui fenêtre','Non','Grille de ventilation'] }
+        ]},
+        { id:'ventil_gaz', label:'Ventilation spécifique gaz', questions:[
+          { key:'present', label:'Si gaz — ventilation suffisante', type:'select', opts:['Oui','Non à créer','N/A','Inconnu'] }
+        ]}
+      ]
+    },
+    {
+      id:'sol', icon:'⬜', title:'Sol & revêtements',
+      items: [
+        { id:'sol_existant', label:'Revêtement existant', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Carrelage','Parquet','Lino / PVC','Béton brut','Chape','Autre'] },
+          { key:'etat', label:'État', type:'select', opts:['Bon — récupérable','Abîmé — à déposer','À évaluer'] }
+        ]},
+        { id:'planeite', label:'Planéité / niveau', questions:[
+          { key:'etat', label:'Évaluation', type:'select', opts:['Plan et de niveau','Quelques défauts','Très irrégulier'] }
+        ]},
+        { id:'chape', label:'Chape existante', questions:[
+          { key:'present', label:'Présence', type:'select', opts:['Oui en bon état','Oui à reprendre','Non','Inconnu'] }
+        ]},
+        { id:'raccords', label:'Raccords pièces adjacentes', questions:[
+          { key:'desc', label:'Description', ph:'Seuils, joints à gérer...', type:'textarea' }
+        ]}
+      ]
+    },
+    {
+      id:'sdb_specifique', icon:'🛁', title:'Spécifique salle de bain',
+      items: [
+        { id:'douche_existante', label:'Douche existante', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Receveur standard','Receveur extra-plat','Italienne','Baignoire','Aucune'] },
+          { key:'dims', label:'Dimensions', ph:'L x P en cm' }
+        ]},
+        { id:'wc_existant', label:'WC existant', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Sol classique','Suspendu','Aucun dans la pièce'] },
+          { key:'position', label:'Position actuelle', ph:'Emplacement' }
+        ]},
+        { id:'vasque_existante', label:'Vasque existante', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Meuble vasque','Vasque seule','Sur colonne','Aucune'] },
+          { key:'dims', label:'Largeur meuble (cm)', ph:'Ex: 60, 80...' }
+        ]},
+        { id:'sech_serv', label:'Sèche-serviette', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Électrique','Hydraulique','Aucun','À prévoir'] },
+          { key:'puissance', label:'Puissance', ph:'Si électrique' }
+        ]},
+        { id:'zone_receveur', label:'Zone receveur prévue', questions:[
+          { key:'dims', label:'Dimensions cibles', ph:'Ex: 90x90, 80x120...' },
+          { key:'evac', label:'Position évacuation', ph:'Angle, centre, paroi...' }
+        ]}
+      ]
+    },
+    {
+      id:'vigilance', icon:'⚠️', title:'Points de vigilance',
+      items: [
+        { id:'humidite', label:'Humidité / moisissures', questions:[
+          { key:'present', label:'Traces', type:'select', opts:['Non','Légères','Importantes','Très importantes'] },
+          { key:'localisation', label:'Localisation', ph:'Où ?' }
+        ]},
+        { id:'amiante', label:'Risque amiante', questions:[
+          { key:'annee', label:'Année construction', ph:'Avant 1997 ?' },
+          { key:'diagnostic', label:'Diagnostic fait', type:'select', opts:['Oui négatif','Oui positif','Non — à faire','Inconnu'] }
+        ]},
+        { id:'plomb', label:'Risque plomb', questions:[
+          { key:'evaluation', label:'Présence peintures anciennes', type:'select', opts:['Non','Possible','Confirmé','Inconnu'] }
+        ]},
+        { id:'mise_normes', label:'Mise aux normes électriques', questions:[
+          { key:'necessaire', label:'Nécessaire ?', type:'select', opts:['Non','Partielle','Complète','À évaluer'] }
+        ]},
+        { id:'acces', label:'Accès chantier', questions:[
+          { key:'type', label:'Accessibilité', type:'select', opts:['Plain-pied','Escalier standard','Escalier étroit','Ascenseur'] },
+          { key:'stationnement', label:'Stationnement', type:'select', opts:['Facile','Difficile','Rue étroite'] }
+        ]},
+        { id:'contraintes', label:'Contraintes voisinage / copro', questions:[
+          { key:'copro', label:'Copropriété', type:'select', opts:['Non','Oui — règlement','Oui — travaux déclarés'] },
+          { key:'horaires', label:'Horaires imposés', ph:'Ex: 8h-18h pas le samedi...' }
+        ]}
+      ]
+    }
+  ],
+  cuisine: [
+    { id:'dims', icon:'📐', title:'Dimensions & géométrie', type:'dims' },
+    {
+      id:'geometrie', icon:'🧱', title:'Géométrie & structure',
+      items: [
+        { id:'mur_type', label:'Type de murs', questions:[
+          { key:'nature', label:'Nature', type:'select', opts:['Porteur','Cloison','Mixte'] },
+          { key:'materiau', label:'Matériau', type:'select', opts:['Placo','Brique','Béton','Pierre','Mixte'] }
+        ]},
+        { id:'plafond', label:'Plafond', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Plat','Faux plafond','Poutres apparentes','Pente'] }
+        ]},
+        { id:'ouverture', label:'Ouverture vers séjour', questions:[
+          { key:'projet', label:'Modification prévue', type:'select', opts:['Cuisine ouverte à créer','Agrandir ouverture','Aucune','À voir'] },
+          { key:'mur', label:'Type de mur concerné', type:'select', opts:['Cloison placo','Brique','Béton — étude','Pierre — étude'] }
+        ]}
+      ]
+    },
+    {
+      id:'plomberie_cuisine', icon:'🔧', title:'Plomberie cuisine',
+      items: [
+        { id:'evier', label:'Évier existant', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Simple bac','Double bac','Sous-plan','Aucun'] },
+          { key:'position', label:'Position', ph:'Sous fenêtre...' }
+        ]},
+        { id:'ef_cuisine', label:'Arrivée eau froide', questions:[
+          { key:'position', label:'Position', ph:'Sous évier...' },
+          { key:'materiau', label:'Matériau', type:'select', opts:['Cuivre','PER','Multicouche'] }
+        ]},
+        { id:'ec_cuisine', label:'Arrivée eau chaude', questions:[
+          { key:'position', label:'Position', ph:'Emplacement' }
+        ]},
+        { id:'evac_cuisine', label:'Évacuation', questions:[
+          { key:'position', label:'Position', ph:'Emplacement' },
+          { key:'diametre', label:'Diamètre (mm)', ph:'Ex: 40, 50' }
+        ]},
+        { id:'lv', label:'Lave-vaisselle', questions:[
+          { key:'prevu', label:'Prévu', type:'select', opts:['Oui à créer','Existant','Non prévu'] },
+          { key:'position', label:'Position', ph:'À droite évier...' }
+        ]}
+      ]
+    },
+    {
+      id:'elec_cuisine', icon:'⚡', title:'Électricité cuisine',
+      items: [
+        { id:'tableau_c', label:'Tableau électrique', questions:[
+          { key:'position', label:'Emplacement', ph:'Où ?' },
+          { key:'dispos', label:'Disjoncteurs libres', type:'select', opts:['Plusieurs','Un seul','Plein'] }
+        ]},
+        { id:'circ_four', label:'Circuit four dédié', questions:[
+          { key:'existant', label:'Existant', type:'select', opts:['Conforme','À créer','Inconnu'] }
+        ]},
+        { id:'circ_plaque', label:'Circuit plaque', questions:[
+          { key:'existant', label:'Existant', type:'select', opts:['Conforme','À créer','Inconnu'] }
+        ]},
+        { id:'circ_frigo', label:'Circuit réfrigérateur', questions:[
+          { key:'existant', label:'Existant', type:'select', opts:['Conforme','À créer','Inconnu'] }
+        ]},
+        { id:'prises_plan', label:'Prises plan de travail', questions:[
+          { key:'nombre', label:'Nombre souhaité', ph:'Ex: 4, 6...' },
+          { key:'usb', label:'Prises USB', type:'select', opts:['Oui','Non'] }
+        ]},
+        { id:'eclair', label:'Éclairage', questions:[
+          { key:'plafond', label:'Plafond', ph:'Type souhaité' },
+          { key:'sous_meuble', label:'Sous meubles hauts', type:'select', opts:['LED ruban','Spots','Aucun'] }
+        ]}
+      ]
+    },
+    {
+      id:'electromenager', icon:'🍳', title:'Électroménager',
+      items: [
+        { id:'plaque', label:'Plaque de cuisson', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Induction','Vitrocéramique','Gaz réseau','Gaz bouteille'] },
+          { key:'dims', label:'Dimensions (cm)', ph:'Ex: 60, 75, 90...' },
+          { key:'notes', label:'Notes', ph:'Si gaz — emplacement bouteille...', type:'textarea' }
+        ]},
+        { id:'four', label:'Four', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Encastrable','Combiné MO','À poser','Non prévu'] },
+          { key:'position', label:'Position', ph:'Colonne, sous plan...' }
+        ]},
+        { id:'hotte', label:'Hotte aspirante', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Évacuation extérieure','Recyclage','Îlot','Intégrable'] },
+          { key:'evac', label:'Évacuation extérieure possible', type:'select', opts:['Oui — gaine existante','Oui — à créer','Non — recyclage','Inconnu'] }
+        ]},
+        { id:'frigo', label:'Réfrigérateur', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Encastrable','Pose libre','Américain','Sous plan'] },
+          { key:'dims', label:'Espace réservé', ph:'L x H...' }
+        ]}
+      ]
+    },
+    {
+      id:'ventilation', icon:'💨', title:'Ventilation',
+      items: [
+        { id:'vmc', label:'VMC', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Simple flux','Double flux','Hygroréglable','Aucune'] },
+          { key:'etat', label:'État', type:'select', opts:['Bon','À surveiller','À remplacer'] }
+        ]},
+        { id:'fenetre_c', label:'Fenêtre / aération', questions:[
+          { key:'present', label:'Présence', type:'select', opts:['Oui','Non','Grille'] }
+        ]}
+      ]
+    },
+    {
+      id:'sol', icon:'⬜', title:'Sol & revêtements',
+      items: [
+        { id:'sol_actuel', label:'Sol existant', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Carrelage','Parquet','Lino','Béton'] },
+          { key:'etat', label:'État', type:'select', opts:['Bon','À déposer','À évaluer'] }
+        ]},
+        { id:'sol_cible', label:'Sol souhaité', questions:[
+          { key:'type', label:'Type cible', type:'select', opts:['Carrelage','Grand format','Parquet','LVT','Béton ciré','À définir'] },
+          { key:'continuite', label:'Continuité pièce adjacente', type:'select', opts:['Oui même sol','Non joint','À définir'] }
+        ]},
+        { id:'credence', label:'Crédence', questions:[
+          { key:'type', label:'Type', type:'select', opts:['Carrelage','Verre laqué','Inox','Béton ciré','Stratifié'] }
+        ]}
+      ]
+    },
+    {
+      id:'vigilance_c', icon:'⚠️', title:'Points de vigilance',
+      items: [
+        { id:'gaz_secu', label:'Gaz — sécurité', questions:[
+          { key:'type', label:'Type installation', type:'select', opts:['Réseau — pro certifié','Bouteille — pro certifié','Aucun gaz'] },
+          { key:'ventilation', label:'Ventilation obligatoire', type:'select', opts:['Suffisante','À créer','N/A'] },
+          { key:'notes', label:'Notes', ph:'À sous-traiter obligatoirement', type:'textarea' }
+        ]},
+        { id:'humidite_c', label:'Humidité', questions:[
+          { key:'traces', label:'Traces', type:'select', opts:['Non','Légères','Importantes'] }
+        ]},
+        { id:'amiante_c', label:'Amiante / plomb', questions:[
+          { key:'annee', label:'Année construction', ph:'Avant 1997 ?' }
+        ]},
+        { id:'acces_c', label:'Accès et livraison', questions:[
+          { key:'acces', label:'Accessibilité', type:'select', opts:['Facile','Escalier','Étroit','Ascenseur'] },
+          { key:'livraison', label:'Livraison cuisine', ph:'Portage, étage...', type:'textarea' }
+        ]}
+      ]
+    }
+  ]
 };
 
-// ══════════════════════════════════════
+const MATOS_DEFAULT = [
+  { id:'tel', icon:'📱', label:'Téléphone (chargé 100%) + batterie externe' },
+  { id:'metre', icon:'📏', label:'Mètre ruban 5m' },
+  { id:'laser', icon:'📐', label:'Mètre laser (Leica DISTO)' },
+  { id:'pied', icon:'🔧', label:'Pied à coulisse' },
+  { id:'niveau', icon:'📏', label:'Niveau à bulle' },
+  { id:'frontale', icon:'💡', label:'Lampe frontale' },
+  { id:'thermique', icon:'🔥', label:'Caméra thermique' },
+  { id:'tension', icon:'⚡', label:'Détecteur de tension sans contact' },
+  { id:'prise', icon:'🔌', label:'Testeur de prise électrique' },
+  { id:'carnet', icon:'📝', label:'Carnet et crayon' },
+  { id:'gants', icon:'🧤', label:'Gants & EPI' },
+  { id:'masque', icon:'😷', label:'Masque FFP2 (si nécessaire)' },
+];
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+
+let releves = [];
+let currentReleveId = null;
+const STORAGE_KEY = 'kusthome_releves_v1';
+
+function loadReleves() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    releves = saved ? JSON.parse(saved) : [];
+  } catch(e) { releves = []; }
+}
+
+function saveReleves() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(releves)); }
+  catch(e) { showToast('⚠️ Erreur de sauvegarde'); }
+}
+
+function getCurrentReleve() {
+  return releves.find(r => r.id === currentReleveId);
+}
+
+function createNewReleve() {
+  const newId = 'r_' + Date.now();
+  const newReleve = {
+    id: newId,
+    createdAt: new Date().toISOString(),
+    status: 'brouillon',
+    type: '',
+    client: { nom:'', adresse:'', tel:'', email:'', date:'', budgetMin:'', budgetMax:'', planning:'' },
+    messageSent: false,
+    matos: MATOS_DEFAULT.map(m => ({ ...m, checked: false })),
+    matosCustom: [],
+    dims: { l:'', w:'', h:'', note:'' },
+    technique: {},  // sectionId_itemId -> { checked, status, details: {key:val} }
+    modifs: {},     // key -> value
+  };
+  releves.push(newReleve);
+  currentReleveId = newId;
+  saveReleves();
+  goToSection('client');
+}
+
+function openReleve(id) {
+  currentReleveId = id;
+  goToOverview();
+}
+
+function confirmDelete(id) {
+  showModal('Supprimer ce relevé ?', 'Cette action est définitive et ne peut pas être annulée.', () => {
+    releves = releves.filter(r => r.id !== id);
+    saveReleves();
+    renderHome();
+    closeModal();
+  });
+}
+
+function confirmDeleteCurrent() {
+  if (!currentReleveId) return;
+  showModal('Supprimer ce relevé ?', 'Cette action est définitive et ne peut pas être annulée.', () => {
+    releves = releves.filter(r => r.id !== currentReleveId);
+    currentReleveId = null;
+    saveReleves();
+    goHome();
+    closeModal();
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() { renderHome(); showScreen('screen-home'); }
+function goToOverview() { renderOverview(); showScreen('screen-overview'); }
+function saveAndGoHome() { saveReleves(); goHome(); showToast('✓ Relevé enregistré'); }
+
+function goToSection(section) {
+  switch(section) {
+    case 'client': renderClient(); showScreen('screen-client'); break;
+    case 'message': renderMessage(); showScreen('screen-message'); break;
+    case 'matos': renderMatos(); showScreen('screen-matos'); break;
+    case 'technique': renderTechnique(); showScreen('screen-technique'); break;
+    case 'modifs': renderModifs(); showScreen('screen-modifs'); break;
+    case 'exports': renderExports(); showScreen('screen-exports'); break;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // HOME
-// ══════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 
-document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+function renderHome() {
+  const list = document.getElementById('releve-list');
+  if (!releves.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Aucun relevé pour l'instant</p>
+      <p style="font-size: 12px; margin-top: 6px;">Tape sur "+ Nouveau relevé" pour commencer</p>
+    </div>`;
+    return;
+  }
+  // Sort by created date, most recent first
+  const sorted = [...releves].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  list.innerHTML = sorted.map(r => {
+    const name = r.client.nom || 'Sans nom';
+    const type = r.type ? typeLabel(r.type) : '—';
+    const date = r.client.date ? new Date(r.client.date).toLocaleDateString('fr-FR') : 'Pas de date';
+    const statusBadge = statusBadgeHTML(r.status);
+    return `<div class="releve-card" onclick="openReleve('${r.id}')">
+      <button class="delete-btn" onclick="event.stopPropagation(); confirmDelete('${r.id}')">🗑</button>
+      <div class="releve-card-top">
+        <div class="releve-card-name">${name}</div>
+      </div>
+      <div class="releve-card-meta">${type} · ${date}</div>
+      <div class="releve-card-bottom">
+        ${statusBadge}
+        <span class="releve-card-arrow">›</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-function selectType(type, el) {
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+function typeLabel(t) {
+  return { sdb:'Salle de bain', cuisine:'Cuisine', complet:'Rénovation complète', autre:'Autre' }[t] || t;
+}
+
+function statusBadgeHTML(s) {
+  const map = {
+    brouillon: { cls:'status-brouillon', lbl:'📝 Brouillon' },
+    releve: { cls:'status-releve', lbl:'✅ Relevé fait' },
+    devis: { cls:'status-devis', lbl:'📄 Devis envoyé' },
+    encours: { cls:'status-encours', lbl:'🔨 En cours' },
+    fini: { cls:'status-fini', lbl:'🏁 Terminé' }
+  };
+  const info = map[s] || map.brouillon;
+  return `<span class="status-badge ${info.cls}">${info.lbl}</span>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// OVERVIEW
+// ════════════════════════════════════════════════════════════
+
+function renderOverview() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  document.getElementById('ov-title').textContent = r.client.nom || 'Nouveau relevé';
+  document.getElementById('ov-sub').textContent = r.type ? typeLabel(r.type) : 'Type non défini';
+  document.getElementById('proj-status').value = r.status;
+
+  // Update check marks on tiles
+  document.getElementById('check-client').classList.toggle('done', !!r.client.nom);
+  document.getElementById('check-message').classList.toggle('done', !!r.messageSent);
+
+  const matosDone = (r.matos || []).filter(m => m.checked).length + (r.matosCustom||[]).filter(m=>m.checked).length;
+  document.getElementById('check-matos').classList.toggle('done', matosDone > 0);
+
+  const techDone = Object.values(r.technique || {}).filter(t => t.checked).length;
+  document.getElementById('check-technique').classList.toggle('done', techDone > 0);
+
+  const modifsDone = Object.values(r.modifs || {}).some(v => v && v.length > 0);
+  document.getElementById('check-modifs').classList.toggle('done', modifsDone);
+
+  document.getElementById('check-exports').classList.toggle('done', r.status !== 'brouillon');
+
+  // Update tile borders
+  ['client','message','matos','technique','modifs','exports'].forEach(s => {
+    const tile = document.querySelector(`.nav-tile[onclick*="'${s}'"]`);
+    if (tile) tile.classList.toggle('done', document.getElementById('check-'+s).classList.contains('done'));
+  });
+
+  // Global progress
+  let done = 0, total = 6;
+  if (r.client.nom) done++;
+  if (r.messageSent) done++;
+  if (matosDone > 0) done++;
+  if (techDone > 0) done++;
+  if (modifsDone) done++;
+  if (r.status !== 'brouillon') done++;
+  document.getElementById('ov-progress').style.width = (done/total*100) + '%';
+}
+
+function updateStatus() {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.status = document.getElementById('proj-status').value;
+  saveReleves();
+}
+
+// ════════════════════════════════════════════════════════════
+// SECTION : CLIENT
+// ════════════════════════════════════════════════════════════
+
+function renderClient() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  document.getElementById('cli-nom').value = r.client.nom || '';
+  document.getElementById('cli-adresse').value = r.client.adresse || '';
+  document.getElementById('cli-tel').value = r.client.tel || '';
+  document.getElementById('cli-email').value = r.client.email || '';
+  document.getElementById('cli-date').value = r.client.date || '';
+  document.getElementById('cli-budget-min').value = r.client.budgetMin || '';
+  document.getElementById('cli-budget-max').value = r.client.budgetMax || '';
+  document.getElementById('cli-planning').value = r.client.planning || '';
+  // Type buttons
+  document.querySelectorAll('#screen-client .type-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.type === r.type);
+  });
+}
+
+function selectProjectType(type, el) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.type = type;
+  document.querySelectorAll('#screen-client .type-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
-  state.type = type;
+  saveReleves();
 }
 
-function goToChecklist() {
-  state.client = document.getElementById('f-client').value || 'Client';
-  state.adresse = document.getElementById('f-adresse').value || '';
-  state.date = document.getElementById('f-date').value || '';
-  state.bien = document.getElementById('f-bien').value || '';
-  state.notes = document.getElementById('f-notes').value || '';
-  document.getElementById('cl-subtitle').textContent = state.client;
-  buildChecklist();
-  showScreen('screen-checklist');
+function updateClient(key, val) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.client[key] = val;
+  saveReleves();
 }
 
-// ══════════════════════════════════════
-// BUILD CHECKLIST
-// ══════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// SECTION : MESSAGE
+// ════════════════════════════════════════════════════════════
 
-function buildChecklist() {
-  const sections = getSectionsForType(state.type);
-  const container = document.getElementById('checklist-content');
-  container.innerHTML = '';
+function renderMessage() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  const prenom = (r.client.nom || '[Prénom]').split(' ')[0];
+  const date = r.client.date ? new Date(r.client.date).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}) : '[date]';
+  const msg = `Bonjour ${prenom},
 
-  sections.forEach((section, si) => {
-    const card = document.createElement('div');
-    card.className = 'section-card' + (si === 0 ? ' open' : '');
-    card.id = 'sc-' + section.id;
+Ravi de vous retrouver le ${date} pour notre rendez-vous ! Pour qu'on puisse en tirer le maximum et avancer efficacement sur votre projet, j'aurais besoin que vous réfléchissiez à quelques points avant notre rencontre.
 
-    if (section.type === 'dimensions') {
-      card.innerHTML = `
-        <div class="section-card-header" onclick="toggleSection('${section.id}')">
-          <span class="section-icon">${section.icon}</span>
-          <span class="section-name">${section.title}</span>
+📋 Ce qui m'aiderait vraiment :
+
+• Votre budget global ou fourchette envisagée
+• Vos envies incontournables — ce que vous voulez absolument avoir
+• Les matériaux ou styles que vous aimez, et ceux que vous voulez éviter
+• Des photos d'inspiration (Pinterest, Instagram...) — même 5 ou 6 suffisent
+• Vos contraintes de planning — dates à respecter ou périodes à éviter
+• Si des travaux ont déjà été réalisés récemment dans cette pièce
+• Vos éventuelles questions ou inquiétudes sur le projet
+
+Pas besoin de tout avoir en détail — même des idées approximatives m'aident à préparer des propositions adaptées et à ne pas perdre de temps sur place.
+
+À très vite,
+Maxime — Kusthome`;
+  document.getElementById('msg-text').textContent = msg;
+}
+
+function copyMessage() {
+  const text = document.getElementById('msg-text').textContent;
+  copyToClipboard(text);
+  showToast('✓ Message copié');
+}
+
+function markMessageDone() {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.messageSent = true;
+  saveReleves();
+  goToOverview();
+}
+
+// ════════════════════════════════════════════════════════════
+// SECTION : MATÉRIEL
+// ════════════════════════════════════════════════════════════
+
+function renderMatos() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  if (!r.matos || !r.matos.length) r.matos = MATOS_DEFAULT.map(m => ({ ...m, checked: false }));
+  if (!r.matosCustom) r.matosCustom = [];
+
+  const container = document.getElementById('matos-list');
+  const allItems = [...r.matos, ...r.matosCustom];
+  container.innerHTML = allItems.map((m, idx) => {
+    const isCustom = idx >= r.matos.length;
+    return `<div class="matos-item ${m.checked?'checked':''}" onclick="toggleMatos(${idx})">
+      <span class="matos-icon">${m.icon || '🔹'}</span>
+      <span class="matos-label">${m.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleMatos(idx) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  const allItems = [...r.matos, ...r.matosCustom];
+  if (idx < r.matos.length) {
+    r.matos[idx].checked = !r.matos[idx].checked;
+  } else {
+    const customIdx = idx - r.matos.length;
+    r.matosCustom[customIdx].checked = !r.matosCustom[customIdx].checked;
+  }
+  saveReleves();
+  renderMatos();
+}
+
+function addMatosItem() {
+  const label = prompt('Nom de l\'élément à ajouter :');
+  if (!label || !label.trim()) return;
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.matosCustom = r.matosCustom || [];
+  r.matosCustom.push({ icon:'🔹', label: label.trim(), checked: false });
+  saveReleves();
+  renderMatos();
+}
+
+// ════════════════════════════════════════════════════════════
+// SECTION : TECHNIQUE
+// ════════════════════════════════════════════════════════════
+
+function renderTechnique() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  const sections = TECH_SECTIONS[r.type] || TECH_SECTIONS.sdb;
+  document.getElementById('tech-sub').textContent = typeLabel(r.type || 'sdb');
+
+  const container = document.getElementById('technique-content');
+  container.innerHTML = sections.map((s, si) => {
+    if (s.type === 'dims') {
+      return `<div class="section-card open">
+        <div class="section-card-header" onclick="toggleSec(this)">
+          <span class="section-icon">${s.icon}</span>
+          <span class="section-name">${s.title}</span>
           <span class="section-chevron">▼</span>
         </div>
         <div class="section-body">
-          <p style="font-size:12px;color:var(--muted);padding:12px 0 10px">Dimensions de la pièce en centimètres</p>
+          <p style="font-size: 12px; color: var(--text-muted); padding: 12px 0 8px;">Dimensions en centimètres</p>
           <div class="dim-grid">
-            <div class="dim-field"><span class="dim-label">Longueur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.l=this.value;updateProgress()"></div>
-            <div class="dim-field"><span class="dim-label">Largeur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.w=this.value;updateProgress()"></div>
-            <div class="dim-field"><span class="dim-label">Hauteur</span><input class="dim-input" type="number" placeholder="cm" inputmode="numeric" oninput="state.dims.h=this.value;updateProgress()"></div>
+            <div class="dim-field"><span class="dim-label">Longueur</span><input class="dim-input" type="number" inputmode="numeric" id="dim-l" oninput="updateDim('l', this.value)" placeholder="cm"></div>
+            <div class="dim-field"><span class="dim-label">Largeur</span><input class="dim-input" type="number" inputmode="numeric" id="dim-w" oninput="updateDim('w', this.value)" placeholder="cm"></div>
+            <div class="dim-field"><span class="dim-label">Hauteur</span><input class="dim-input" type="number" inputmode="numeric" id="dim-h" oninput="updateDim('h', this.value)" placeholder="cm"></div>
           </div>
-          <div style="margin-top:14px">
-            <p style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Notes dimensions</p>
-            <textarea class="dq-textarea" placeholder="Angles non droits, alcôves, poutres, recoins..." rows="2" oninput="state.dims.note=this.value"></textarea>
+          <div style="margin-top: 14px">
+            <div class="dq-label">Notes dimensions</div>
+            <textarea class="dq-textarea" id="dim-note" placeholder="Renfoncements, alcôves, angles non droits..." oninput="updateDim('note', this.value)"></textarea>
           </div>
-        </div>`;
-    } else {
-      const itemsHTML = section.items.map(item => {
-        if (!state.checks[item.id]) state.checks[item.id] = false;
-        if (!state.details[item.id]) state.details[item.id] = { status: null };
-
-        const questionsHTML = item.questions.map(q => {
-          const key = item.id + '_' + q.key;
-          if (!state.details[key]) state.details[key] = '';
-          if (q.type === 'select') {
-            return `<div class="dq-item">
-              <div class="dq-label">${q.label}</div>
-              <select class="dq-select" onchange="state.details['${key}']=this.value">
-                <option value="">— Choisir —</option>
-                ${q.opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-              </select>
-            </div>`;
-          } else if (q.type === 'textarea') {
-            return `<div class="dq-item">
-              <div class="dq-label">${q.label}</div>
-              <textarea class="dq-textarea" placeholder="${q.ph||''}" rows="2" oninput="state.details['${key}']=this.value"></textarea>
-            </div>`;
-          } else {
-            return `<div class="dq-item">
-              <div class="dq-label">${q.label}</div>
-              <input class="dq-input" type="text" placeholder="${q.ph||''}" oninput="state.details['${key}']=this.value">
-            </div>`;
-          }
-        }).join('');
-
-        return `
-        <div class="check-item">
-          <div class="check-top" onclick="toggleCheck('${item.id}')">
-            <div class="check-box ${item.warning?'warning':''}" id="cb-${item.id}"></div>
-            <div style="flex:1">
-              <div class="check-name">${item.label}</div>
-            </div>
-          </div>
-          <div class="detail-panel" id="dp-${item.id}">
-            <div class="status-row">
-              <button class="status-btn ok" onclick="setStatus('${item.id}','ok',event)">✓ OK</button>
-              <button class="status-btn warn" onclick="setStatus('${item.id}','warn',event)">⚠ À surveiller</button>
-              <button class="status-btn ko" onclick="setStatus('${item.id}','ko',event)">✗ Problème</button>
-            </div>
-            <div class="detail-questions">${questionsHTML}</div>
-          </div>
-        </div>`;
-      }).join('');
-
-      const total = section.items.length;
-      card.innerHTML = `
-        <div class="section-card-header" onclick="toggleSection('${section.id}')">
-          <span class="section-icon">${section.icon}</span>
-          <span class="section-name">${section.title}</span>
-          <span class="section-badge" id="badge-${section.id}">0/${total}</span>
-          <span class="section-chevron">▼</span>
         </div>
-        <div class="section-body"><div style="padding-top:6px">${itemsHTML}</div></div>`;
+      </div>`;
     }
-    container.appendChild(card);
+    return renderTechSection(s, si === 1);
+  }).join('');
+
+  // Restore values
+  if (r.dims) {
+    if (r.dims.l) document.getElementById('dim-l').value = r.dims.l;
+    if (r.dims.w) document.getElementById('dim-w').value = r.dims.w;
+    if (r.dims.h) document.getElementById('dim-h').value = r.dims.h;
+    if (r.dims.note) document.getElementById('dim-note').value = r.dims.note;
+  }
+
+  // Restore tech values
+  Object.keys(r.technique || {}).forEach(key => {
+    const t = r.technique[key];
+    if (t.checked) {
+      const box = document.getElementById('cb-' + key);
+      const dp = document.getElementById('dp-' + key);
+      if (box) box.classList.add('checked');
+      if (dp) dp.classList.add('visible');
+    }
+    if (t.status) {
+      const btns = document.querySelectorAll(`#dp-${key} .status-btn`);
+      btns.forEach(b => {
+        if (b.classList.contains(t.status)) b.classList.add('active');
+      });
+    }
+    Object.keys(t.details || {}).forEach(dkey => {
+      const el = document.getElementById(`f-${key}-${dkey}`);
+      if (el) el.value = t.details[dkey];
+    });
   });
-  updateProgress();
+
+  updateTechProgress();
 }
 
-function toggleSection(id) {
-  document.getElementById('sc-' + id).classList.toggle('open');
+function renderTechSection(s, openByDefault) {
+  const itemsHTML = (s.items || []).map(item => {
+    const key = s.id + '_' + item.id;
+    const questionsHTML = (item.questions || []).map(q => {
+      const qkey = `f-${key}-${q.key}`;
+      if (q.type === 'select') {
+        return `<div class="dq-item">
+          <div class="dq-label">${q.label}</div>
+          <select class="dq-select" id="${qkey}" onchange="updateTechDetail('${key}', '${q.key}', this.value)">
+            <option value="">— Choisir —</option>
+            ${q.opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+          </select>
+        </div>`;
+      } else if (q.type === 'textarea') {
+        return `<div class="dq-item">
+          <div class="dq-label">${q.label}</div>
+          <textarea class="dq-textarea" id="${qkey}" placeholder="${q.ph||''}" oninput="updateTechDetail('${key}', '${q.key}', this.value)"></textarea>
+        </div>`;
+      } else {
+        return `<div class="dq-item">
+          <div class="dq-label">${q.label}</div>
+          <input class="dq-input" id="${qkey}" type="text" placeholder="${q.ph||''}" oninput="updateTechDetail('${key}', '${q.key}', this.value)">
+        </div>`;
+      }
+    }).join('');
+
+    return `<div class="check-item">
+      <div class="check-top" onclick="toggleTech('${key}')">
+        <div class="check-box" id="cb-${key}"></div>
+        <div class="check-name">${item.label}</div>
+      </div>
+      <div class="detail-panel" id="dp-${key}">
+        <div class="status-row">
+          <button class="status-btn ok" onclick="setTechStatus('${key}','ok',event)">✓ OK</button>
+          <button class="status-btn warn" onclick="setTechStatus('${key}','warn',event)">⚠ À surveiller</button>
+          <button class="status-btn ko" onclick="setTechStatus('${key}','ko',event)">✗ Problème</button>
+        </div>
+        <div class="detail-questions">${questionsHTML}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="section-card ${openByDefault?'open':''}">
+    <div class="section-card-header" onclick="toggleSec(this)">
+      <span class="section-icon">${s.icon}</span>
+      <span class="section-name">${s.title}</span>
+      <span class="section-badge" id="badge-${s.id}">0/${(s.items||[]).length}</span>
+      <span class="section-chevron">▼</span>
+    </div>
+    <div class="section-body">${itemsHTML}</div>
+  </div>`;
 }
 
-function toggleCheck(id) {
-  state.checks[id] = !state.checks[id];
-  const box = document.getElementById('cb-' + id);
-  box.classList.toggle('checked', state.checks[id]);
-  const dp = document.getElementById('dp-' + id);
-  dp.classList.toggle('visible', state.checks[id]);
-  updateProgress();
-  updateBadges();
+function toggleSec(headerEl) {
+  headerEl.parentElement.classList.toggle('open');
 }
 
-function setStatus(id, status, e) {
+function toggleTech(key) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  if (!r.technique[key]) r.technique[key] = { checked: false, status: null, details: {} };
+  r.technique[key].checked = !r.technique[key].checked;
+  document.getElementById('cb-'+key).classList.toggle('checked', r.technique[key].checked);
+  document.getElementById('dp-'+key).classList.toggle('visible', r.technique[key].checked);
+  saveReleves();
+  updateTechProgress();
+}
+
+function setTechStatus(key, status, e) {
   e.stopPropagation();
-  state.details[id] = state.details[id] || {};
-  state.details[id].status = status;
-  const row = document.querySelector(`#dp-${id} .status-row`);
-  row.querySelectorAll('.status-btn').forEach(b => {
+  const r = getCurrentReleve();
+  if (!r) return;
+  if (!r.technique[key]) r.technique[key] = { checked: true, status: null, details: {} };
+  r.technique[key].status = status;
+  document.querySelectorAll(`#dp-${key} .status-btn`).forEach(b => {
     b.classList.remove('active');
     if (b.classList.contains(status)) b.classList.add('active');
   });
+  saveReleves();
 }
 
-function updateProgress() {
-  const sections = getSectionsForType(state.type);
+function updateTechDetail(key, dkey, val) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  if (!r.technique[key]) r.technique[key] = { checked: true, status: null, details: {} };
+  r.technique[key].details[dkey] = val;
+  saveReleves();
+}
+
+function updateDim(key, val) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.dims[key] = val;
+  saveReleves();
+}
+
+function updateTechProgress() {
+  const r = getCurrentReleve();
+  if (!r) return;
+  const sections = TECH_SECTIONS[r.type] || TECH_SECTIONS.sdb;
   let total = 0, done = 0;
   sections.forEach(s => {
-    if (s.items) { total += s.items.length; done += s.items.filter(i => state.checks[i.id]).length; }
-  });
-  const pct = total ? Math.round(done/total*100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('cl-progress-text').textContent = done + ' / ' + total;
-}
-
-function updateBadges() {
-  const sections = getSectionsForType(state.type);
-  sections.forEach(s => {
     if (!s.items) return;
-    const done = s.items.filter(i => state.checks[i.id]).length;
+    s.items.forEach(item => {
+      total++;
+      const key = s.id + '_' + item.id;
+      if (r.technique[key] && r.technique[key].checked) done++;
+    });
+    // Update badge
+    const sDone = s.items.filter(i => r.technique[s.id+'_'+i.id] && r.technique[s.id+'_'+i.id].checked).length;
     const badge = document.getElementById('badge-' + s.id);
-    if (badge) { badge.textContent = done + '/' + s.items.length; badge.className = 'section-badge' + (done === s.items.length ? ' done' : ''); }
-  });
-}
-
-// ══════════════════════════════════════
-// RAPPORT
-// ══════════════════════════════════════
-
-function goToRapport() {
-  buildRapport();
-  showScreen('screen-rapport');
-}
-
-function buildRapport() {
-  const sections = getSectionsForType(state.type);
-  const container = document.getElementById('rapport-content');
-  const dateStr = state.date ? new Date(state.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : new Date().toLocaleDateString('fr-FR');
-  document.getElementById('rp-date').textContent = dateStr;
-
-  let total=0, done=0, warns=0, kos=0;
-  sections.forEach(s => {
-    if (s.items) {
-      total += s.items.length;
-      s.items.forEach(i => {
-        if (state.checks[i.id]) {
-          done++;
-          const st = state.details[i.id]?.status;
-          if (st === 'warn') warns++;
-          if (st === 'ko') kos++;
-        }
-      });
+    if (badge) {
+      badge.textContent = sDone + '/' + s.items.length;
+      badge.className = 'section-badge' + (sDone === s.items.length ? ' full' : (sDone > 0 ? ' partial' : ''));
     }
   });
-
-  let html = `<div class="stat-row">
-    <div class="stat-box"><div class="stat-num">${done}</div><div class="stat-label">Points relevés</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--yellow)">${warns}</div><div class="stat-label">À surveiller</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--red)">${kos}</div><div class="stat-label">Problèmes</div></div>
-  </div>`;
-
-  // Dims
-  if (state.dims.l || state.dims.w || state.dims.h) {
-    const surf = (state.dims.l && state.dims.w) ? ((state.dims.l/100)*(state.dims.w/100)).toFixed(1)+' m²' : '—';
-    html += `<div class="rapport-block"><div class="rapport-title">📏 Dimensions</div>
-      ${state.dims.l?`<div class="rapport-item"><span class="r-dot">—</span>Longueur : ${state.dims.l} cm</div>`:''}
-      ${state.dims.w?`<div class="rapport-item"><span class="r-dot">—</span>Largeur : ${state.dims.w} cm</div>`:''}
-      ${state.dims.h?`<div class="rapport-item"><span class="r-dot">—</span>Hauteur : ${state.dims.h} cm</div>`:''}
-      <div class="rapport-item"><span class="r-dot">—</span>Surface estimée : ${surf}</div>
-      ${state.dims.note?`<div class="rapport-item"><span class="r-dot">—</span>${state.dims.note}</div>`:''}
-    </div>`;
-  }
-
-  sections.forEach(s => {
-    if (!s.items) return;
-    const checked = s.items.filter(i => state.checks[i.id]);
-    if (!checked.length) return;
-    let itemsHTML = checked.map(i => {
-      const st = state.details[i.id]?.status;
-      const dotCls = st==='ko'?'ko':st==='warn'?'warn':'';
-      const stLabel = st==='ok'?' ✓':st==='warn'?' ⚠':st==='ko'?' ✗':'';
-      const dets = i.questions.map(q => {
-        const key = i.id+'_'+q.key;
-        const val = state.details[key];
-        return val ? `<span class="r-detail">${q.label} : ${val}</span>` : '';
-      }).join('');
-      return `<div class="rapport-item"><span class="r-dot ${dotCls}">—</span>${i.label}${stLabel}${dets}</div>`;
-    }).join('');
-    html += `<div class="rapport-block"><div class="rapport-title">${s.icon} ${s.title}</div>${itemsHTML}</div>`;
-  });
-
-  // Points bloquants
-  const koPts = [];
-  sections.forEach(s => { if (s.items) s.items.forEach(i => { if (state.checks[i.id] && state.details[i.id]?.status==='ko') koPts.push(i.label); }); });
-  if (koPts.length) {
-    html += `<div class="rapport-block" style="border-color:rgba(224,112,96,0.4)"><div class="rapport-title" style="color:var(--red)">🚨 Points bloquants</div>${koPts.map(p=>`<div class="rapport-item"><span class="r-dot ko">—</span>${p}</div>`).join('')}</div>`;
-  }
-
-  html += `<div class="divider"></div>
-  <div class="rapport-block">
-    <div class="rapport-title">🤖 Texte pour l'IA</div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Copie et colle directement dans Claude pour générer la liste des tâches, matériaux et ébauche de devis.</p>
-    <div class="copy-area" id="ia-text">${buildIAText(sections)}</div>
-  </div>
-  <div class="info-note">Relevé Kusthome — Maxime Leclair</div>`;
-
-  container.innerHTML = html;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('tech-fill').style.width = pct + '%';
+  document.getElementById('tech-progress').textContent = done + ' / ' + total;
 }
 
-function buildIAText(sections) {
-  const dateStr = state.date ? new Date(state.date).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
-  let txt = `RELEVÉ DE CHANTIER — ${state.type.toUpperCase()}\nClient : ${state.client}\nAdresse : ${state.adresse}\nDate : ${dateStr}\n`;
-  if (state.bien) txt += `Type de bien : ${state.bien}\n`;
-  txt += '\n';
-  if (state.notes) txt += `CONTEXTE / SOUHAITS CLIENT :\n${state.notes}\n\n`;
+// ════════════════════════════════════════════════════════════
+// SECTION : MODIFS
+// ════════════════════════════════════════════════════════════
 
-  if (state.dims.l || state.dims.w) {
+function renderModifs() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+  const m = r.modifs || {};
+  const fields = ['cloisons','menuiseries','amenagement','indispensables','banir','style','inspi','bloquants','travaux','revetements','equipements','finitions','notes'];
+  fields.forEach(f => {
+    const el = document.getElementById('mod-'+f) || document.getElementById('sou-'+f) || document.getElementById('con-'+f) || document.getElementById('mat-'+f);
+    if (el && m[f]) el.value = m[f];
+  });
+}
+
+function updateModif(key, val) {
+  const r = getCurrentReleve();
+  if (!r) return;
+  r.modifs = r.modifs || {};
+  r.modifs[key] = val;
+  saveReleves();
+}
+
+// ════════════════════════════════════════════════════════════
+// SECTION : EXPORTS
+// ════════════════════════════════════════════════════════════
+
+function renderExports() {
+  const r = getCurrentReleve();
+  if (!r) return goHome();
+
+  // Stats
+  const techItems = Object.values(r.technique || {}).filter(t => t.checked);
+  const warns = techItems.filter(t => t.status === 'warn').length;
+  const kos = techItems.filter(t => t.status === 'ko').length;
+  document.getElementById('exports-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-num">${techItems.length}</div><div class="stat-label">Points relevés</div></div>
+    <div class="stat-box"><div class="stat-num" style="color: var(--yellow);">${warns}</div><div class="stat-label">À surveiller</div></div>
+    <div class="stat-box"><div class="stat-num" style="color: var(--red);">${kos}</div><div class="stat-label">Problèmes</div></div>
+  `;
+
+  document.getElementById('prompt-devis').textContent = generatePromptDevis(r);
+  document.getElementById('prompt-rendu').textContent = generatePromptRendu(r);
+  document.getElementById('resume-sms').textContent = generateResumeSMS(r);
+  document.getElementById('resume-email').textContent = generateResumeEmail(r);
+  document.getElementById('export-full').textContent = generateExportFull(r);
+}
+
+function generatePromptDevis(r) {
+  const sections = TECH_SECTIONS[r.type] || TECH_SECTIONS.sdb;
+  let txt = `RELEVÉ DE CHANTIER — ${typeLabel(r.type).toUpperCase()}\n`;
+  txt += `Client : ${r.client.nom || 'Non renseigné'}\n`;
+  txt += `Adresse : ${r.client.adresse || 'Non renseignée'}\n`;
+  txt += `Date du RDV : ${r.client.date || 'Non renseignée'}\n`;
+  if (r.client.budgetMin || r.client.budgetMax) txt += `Budget : ${r.client.budgetMin||'?'} € - ${r.client.budgetMax||'?'} €\n`;
+  if (r.client.planning) txt += `Contraintes planning : ${r.client.planning}\n`;
+  txt += '\n';
+
+  if (r.dims.l || r.dims.w) {
     txt += `DIMENSIONS :\n`;
-    if (state.dims.l) txt += `- Longueur : ${state.dims.l} cm\n`;
-    if (state.dims.w) txt += `- Largeur : ${state.dims.w} cm\n`;
-    if (state.dims.h) txt += `- Hauteur : ${state.dims.h} cm\n`;
-    if (state.dims.l && state.dims.w) txt += `- Surface : ${((state.dims.l/100)*(state.dims.w/100)).toFixed(1)} m²\n`;
-    if (state.dims.note) txt += `- Notes : ${state.dims.note}\n`;
+    if (r.dims.l) txt += `- Longueur : ${r.dims.l} cm\n`;
+    if (r.dims.w) txt += `- Largeur : ${r.dims.w} cm\n`;
+    if (r.dims.h) txt += `- Hauteur : ${r.dims.h} cm\n`;
+    if (r.dims.l && r.dims.w) txt += `- Surface : ${((r.dims.l/100)*(r.dims.w/100)).toFixed(1)} m²\n`;
+    if (r.dims.note) txt += `- Notes : ${r.dims.note}\n`;
     txt += '\n';
   }
 
   sections.forEach(s => {
     if (!s.items) return;
-    const checked = s.items.filter(i => state.checks[i.id]);
+    const checked = s.items.filter(i => r.technique[s.id+'_'+i.id] && r.technique[s.id+'_'+i.id].checked);
     if (!checked.length) return;
     txt += `${s.title.toUpperCase()} :\n`;
     checked.forEach(i => {
-      const st = state.details[i.id]?.status;
-      const stLabel = st==='ok'?'[OK]':st==='warn'?'[À SURVEILLER]':st==='ko'?'[PROBLÈME]':'[RELEVÉ]';
+      const t = r.technique[s.id+'_'+i.id];
+      const stLabel = t.status === 'ok' ? '[OK]' : t.status === 'warn' ? '[À SURVEILLER]' : t.status === 'ko' ? '[PROBLÈME]' : '[RELEVÉ]';
       txt += `- ${i.label} ${stLabel}\n`;
       i.questions.forEach(q => {
-        const val = state.details[i.id+'_'+q.key];
+        const val = (t.details || {})[q.key];
         if (val) txt += `  · ${q.label} : ${val}\n`;
       });
     });
     txt += '\n';
   });
 
-  txt += `---\nSur la base de ce relevé, merci de me générer :\n1. La liste complète des tâches par corps de métier dans l'ordre chronologique\n2. Les matériaux et équipements à prévoir avec quantités estimées\n3. Les points de vigilance et risques prioritaires\n4. Une ébauche de devis structurée par poste`;
+  const m = r.modifs || {};
+  if (Object.values(m).some(v => v)) {
+    txt += `MODIFICATIONS PRÉVUES :\n`;
+    if (m.cloisons) txt += `- Cloisons : ${m.cloisons}\n`;
+    if (m.menuiseries) txt += `- Menuiseries : ${m.menuiseries}\n`;
+    if (m.amenagement) txt += `- Aménagement : ${m.amenagement}\n`;
+    if (m.indispensables) txt += `- Indispensables client : ${m.indispensables}\n`;
+    if (m.banir) txt += `- À éviter : ${m.banir}\n`;
+    if (m.style) txt += `- Style souhaité : ${m.style}\n`;
+    if (m.revetements) txt += `- Revêtements : ${m.revetements}\n`;
+    if (m.equipements) txt += `- Équipements : ${m.equipements}\n`;
+    if (m.finitions) txt += `- Finitions : ${m.finitions}\n`;
+    if (m.bloquants) txt += `- Points bloquants : ${m.bloquants}\n`;
+    if (m.notes) txt += `- Notes : ${m.notes}\n`;
+    txt += '\n';
+  }
+
+  txt += `---\nSur la base de ce relevé, merci de me générer :
+1. La liste complète des tâches par corps de métier dans l'ordre chronologique
+2. La liste des matériaux et fournitures avec quantités estimées
+3. Une ébauche de devis structurée par poste (prix indicatifs)
+4. Les points de vigilance et risques prioritaires
+5. Un planning prévisionnel global`;
+
   return txt;
 }
 
-function copyRapport() {
-  const text = document.getElementById('ia-text').textContent;
-  const btn = document.querySelector('#screen-rapport .btn-primary');
+function generatePromptRendu(r) {
+  const m = r.modifs || {};
+  let txt = `Voici une photo de ${typeLabel(r.type).toLowerCase()} à rénover. Génère un visuel réaliste en rénovant la pièce avec les modifications suivantes :\n\n`;
+  if (m.cloisons) txt += `Cloisons : ${m.cloisons}\n`;
+  if (m.menuiseries) txt += `Menuiseries : ${m.menuiseries}\n`;
+  if (m.amenagement) txt += `Aménagement : ${m.amenagement}\n`;
+  if (m.equipements) txt += `Équipements à intégrer : ${m.equipements}\n`;
+  txt += '\nGarde bien les proportions de la pièce.\n\n';
+  if (m.style) txt += `Style souhaité : ${m.style}\n`;
+  if (m.revetements) txt += `Matériaux et revêtements : ${m.revetements}\n`;
+  if (m.finitions) txt += `Finitions et robinetterie : ${m.finitions}\n`;
+  if (m.banir) txt += `À éviter absolument : ${m.banir}\n`;
+  txt += '\nRendu architectural photoréaliste, éclairage naturel et artificiel, qualité magazine.';
+  return txt;
+}
+
+function generateResumeSMS(r) {
+  const prenom = (r.client.nom || '').split(' ')[0] || 'Bonjour';
+  const m = r.modifs || {};
+  let txt = `Bonjour ${prenom},\n\nMerci pour votre accueil ! Voici un récap des points clés de notre RDV :\n\n`;
+  if (m.indispensables) txt += `• Vos envies : ${m.indispensables.split('\n')[0]}\n`;
+  if (m.style) txt += `• Style : ${m.style}\n`;
+  if (r.client.budgetMax) txt += `• Budget cible : ${r.client.budgetMin||'?'}-${r.client.budgetMax} €\n`;
+  txt += `\nJe reviens vers vous très vite avec un devis détaillé.\n\nMaxime — Kusthome`;
+  return txt;
+}
+
+function generateResumeEmail(r) {
+  const prenom = (r.client.nom || '').split(' ')[0] || 'Bonjour';
+  const m = r.modifs || {};
+  const date = r.client.date ? new Date(r.client.date).toLocaleDateString('fr-FR', {day:'numeric', month:'long'}) : 'aujourd\'hui';
+  let txt = `Bonjour ${prenom},\n\nMerci pour votre accueil ${date}. Voici un récapitulatif de notre échange concernant votre projet de ${typeLabel(r.type).toLowerCase()}.\n\n`;
+
+  txt += `LE PROJET\n`;
+  if (m.cloisons) txt += `• Modifications de cloisons : ${m.cloisons}\n`;
+  if (m.menuiseries) txt += `• Menuiseries : ${m.menuiseries}\n`;
+  if (m.amenagement) txt += `• Aménagement : ${m.amenagement}\n`;
+  if (m.equipements) txt += `• Équipements à intégrer : ${m.equipements}\n`;
+  txt += '\n';
+
+  if (m.style || m.revetements || m.finitions) {
+    txt += `STYLE ET FINITIONS\n`;
+    if (m.style) txt += `• Style retenu : ${m.style}\n`;
+    if (m.revetements) txt += `• Revêtements : ${m.revetements}\n`;
+    if (m.finitions) txt += `• Finitions : ${m.finitions}\n`;
+    txt += '\n';
+  }
+
+  if (r.client.budgetMax || r.client.planning) {
+    txt += `CADRE\n`;
+    if (r.client.budgetMin || r.client.budgetMax) txt += `• Budget : ${r.client.budgetMin||'?'} - ${r.client.budgetMax||'?'} €\n`;
+    if (r.client.planning) txt += `• Planning : ${r.client.planning}\n`;
+    txt += '\n';
+  }
+
+  txt += `PROCHAINES ÉTAPES\nJe reviens vers vous prochainement avec :\n- Un devis détaillé par poste\n- Un planning prévisionnel\n- Les options éventuelles à considérer\n\nN'hésitez pas à me recontacter si des éléments vous viennent en tête entre-temps.\n\nBien à vous,\nMaxime Leclair\nKusthome\n06 31 90 78 77`;
+
+  return txt;
+}
+
+function generateExportFull(r) {
+  return generatePromptDevis(r).replace(/\n---\nSur la base.*$/s, '\n— Fin du relevé —');
+}
+
+function copyExport(elId, btn) {
+  const text = document.getElementById(elId).textContent;
+  copyToClipboard(text);
+  btn.textContent = '✓ Copié !';
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    const labels = {
+      'prompt-devis': '📋 Copier le prompt',
+      'prompt-rendu': '📋 Copier le prompt',
+      'resume-sms': '📋 Copier le SMS',
+      'resume-email': '📋 Copier l\'email',
+      'export-full': '📋 Copier l\'export complet'
+    };
+    btn.textContent = labels[elId] || '📋 Copier';
+  }, 2000);
+}
+
+// ════════════════════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════════════════════
+
+function copyToClipboard(text) {
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => { btn.textContent = '✓ Copié !'; setTimeout(()=>btn.textContent='📋 Copier pour l\'IA',2000); });
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
   } else {
-    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent = '✓ Copié !'; setTimeout(()=>btn.textContent='📋 Copier pour l\'IA',2000);
+    fallbackCopy(text);
   }
 }
 
-function newReleve() {
-  state = { type:'sdb', client:'', adresse:'', date:'', bien:'', notes:'', dims:{l:'',w:'',h:'',note:''}, checks:{}, details:{} };
-  document.getElementById('f-client').value=''; document.getElementById('f-adresse').value='';
-  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('f-bien').value=''; document.getElementById('f-notes').value='';
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('type-sdb').classList.add('selected');
-  showScreen('screen-home');
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+function showModal(title, msg, onConfirm) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').textContent = msg;
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('modal-confirm').onclick = onConfirm;
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+
+loadReleves();
+renderHome();
 </script>
 </body>
 </html>
